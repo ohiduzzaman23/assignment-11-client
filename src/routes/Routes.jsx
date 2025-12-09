@@ -13,6 +13,7 @@ import Pricing from "../components/Dashboard/Pricing/Pricing";
 import AddLessonForm from "../components/Form/AddLessonForm";
 import MainLayout from "../layouts/MainLayout";
 import Profile from "../pages/Dashboard/Common/Profile";
+import LessonsWorth from "../components/LessonsWorth";
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { path: "/explore-lessons", element: <ExploreLessons /> },
       { path: "/lessons/:id", element: <LessonDetails /> },
       { path: "/pricing", element: <Pricing /> },
+      { path: "/lessons-worth", element: <LessonsWorth /> },
 
       {
         path: "/dashboard",

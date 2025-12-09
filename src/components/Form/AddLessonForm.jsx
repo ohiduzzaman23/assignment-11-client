@@ -7,8 +7,10 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { imageUpload } from "../../utils";
 import { useRef } from "react";
+import useAuth from "../../hooks/useAuth";
 
 const AddLessonForm = () => {
+  const contributor = useAuth();
   const {
     isPending,
     isError,
@@ -72,6 +74,9 @@ const AddLessonForm = () => {
       image: imageUrl,
       publicLesson: !!publicLesson,
       premiumOnly: !!premiumOnly,
+      user: contributor?.user?.email,
+      displayName: contributor?.user?.displayName || "Anonymous",
+      avatar: contributor?.user?.photoURL || "/images/default.jpg",
     };
 
     await mutateAsync(lessonData);

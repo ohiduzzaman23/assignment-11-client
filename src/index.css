@@ -20,7 +20,3 @@
 .my-btn {
   @apply btn bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl hover:shadow-sm;
 }
-
-/* a.active {
-  @apply bg-base-300;
-} */

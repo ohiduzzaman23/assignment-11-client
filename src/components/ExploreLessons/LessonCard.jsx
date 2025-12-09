@@ -16,7 +16,7 @@ const LessonCard = ({ lesson }) => {
   }, [lesson.title]);
 
   if (!lesson?._id) return null;
-
+  console.log();
   return (
     <Link to={`/lessons/${lesson._id}`}>
       <motion.div
@@ -61,7 +61,7 @@ const LessonCard = ({ lesson }) => {
               {lesson.title}
             </h3>
 
-            <p className={`text-gray-600 text-sm mb-4 line-clamp-${lineClamp}`}>
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
               {lesson.description}
             </p>
           </div>

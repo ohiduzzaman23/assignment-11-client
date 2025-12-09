@@ -14,6 +14,13 @@ const LessonDetails = () => {
   // ---------- States ------
   const [newComment, setNewComment] = useState("");
   const [replyText, setReplyText] = useState({});
+  const [isSaved, setIsSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+
+  // prepare auth header if token exists
+  const token = localStorage.getItem("token");
+  const authHeaders = token ? { authorization: `Bearer ${token}` } : {};
 
   // ---------- Fetch Lesson -------
   const {
@@ -30,19 +37,60 @@ const LessonDetails = () => {
       return res.data;
     },
     enabled: !!id,
+    onSuccess: (data) => {
+      // set local UI states
+      setIsSaved(data.isSaved || false);
+      setIsLiked(data.isLiked || false);
+      setLikesCount(data.likes || 0);
+
+      // increase view
+
+      axios
+        .post(`${import.meta.env.VITE_API_URL}/lessons/${id}/view`)
+        .catch((e) => {
+          console.debug("view increment failed", e?.message || e);
+        });
+    },
   });
 
   // -------- Lesson Mutations -------
+
+  // Like lesson
   const lessonLikeMutation = useMutation({
     mutationFn: async () =>
-      axios.post(`${import.meta.env.VITE_API_URL}/lessons/${id}/like`),
-    onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
+      axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/like`,
+        {},
+        { headers: authHeaders }
+      ),
+    onMutate: () => {
+      // optimistic UI update
+      setIsLiked((prev) => !prev);
+      setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+    },
+    onError: (err) => {
+      // rollback
+      setIsLiked((prev) => !prev);
+      setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+      console.error("Like failed:", err?.response?.data || err.message || err);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["lesson", id]);
+    },
   });
 
+  // Save lesson
   const lessonSaveMutation = useMutation({
     mutationFn: async () =>
       axios.post(`${import.meta.env.VITE_API_URL}/lessons/${id}/save`),
-    onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["lesson", id]);
+      queryClient.invalidateQueries(["lessons-worth"]);
+      setIsSaved((prev) => !prev);
+    },
+    onError: (err) => {
+      console.error("Save failed:", err?.response?.data || err.message || err);
+    },
   });
 
   const lessonShareMutation = useMutation({
@@ -62,13 +110,20 @@ const LessonDetails = () => {
   // ----- Comment Mutations -------
   const commentMutation = useMutation({
     mutationFn: async (text) =>
-      axios.post(`${import.meta.env.VITE_API_URL}/lessons/${id}/comments`, {
-        user: "Current User",
-        text,
-      }),
+      axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/comments`,
+        { text },
+        { headers: authHeaders }
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries(["lesson", id]);
       setNewComment("");
+    },
+    onError: (err) => {
+      console.error(
+        "Post comment failed:",
+        err?.response?.data || err.message || err
+      );
     },
   });
 
@@ -78,14 +133,15 @@ const LessonDetails = () => {
         `${
           import.meta.env.VITE_API_URL
         }/lessons/${id}/comments/${commentId}/replies`,
-        {
-          user: "Current User",
-          text,
-        }
+        { text },
+        { headers: authHeaders }
       ),
     onSuccess: () => {
       queryClient.invalidateQueries(["lesson", id]);
       setReplyText({});
+    },
+    onError: (err) => {
+      console.error("Reply failed:", err?.response?.data || err.message || err);
     },
   });
 
@@ -94,9 +150,17 @@ const LessonDetails = () => {
       axios.post(
         `${
           import.meta.env.VITE_API_URL
-        }/lessons/${id}/comments/${commentId}/like`
+        }/lessons/${id}/comments/${commentId}/like`,
+        {},
+        { headers: authHeaders }
       ),
     onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
+    onError: (err) => {
+      console.error(
+        "Like comment failed:",
+        err?.response?.data || err.message || err
+      );
+    },
   });
 
   // --- Loading / Error ------
@@ -107,7 +171,7 @@ const LessonDetails = () => {
   // ----- Conditional Premium ------
   if (lesson.premiumOnly) return <PremiumCard />;
 
-  // ------ Render ---
+  // ------ Render ---  (UI unchanged)
   return (
     <div className="min-h-screen bg-[#f6f1e7]">
       {/* Header */}
@@ -150,7 +214,7 @@ const LessonDetails = () => {
             <div className="flex items-center flex-wrap gap-4 text-gray-500 text-sm mb-6">
               <span>{new Date(lesson.createdAt).toDateString()}</span>
               <span>{lesson.views || 0} views</span>
-              <span>{lesson.likes || 0} likes</span>
+              <span>{likesCount} likes</span>
               <span>{lesson.saves || 0} saves</span>
               <span>{lesson.shares || 0} shares</span>
             </div>
@@ -162,30 +226,46 @@ const LessonDetails = () => {
 
             {/* Lesson Actions */}
             <div className="flex gap-4 mt-8">
+              {/* Like */}
               <button
                 onClick={() => lessonLikeMutation.mutate()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition  ${
+                  isLiked
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-100 hover:bg-[#F08B42] hover:text-white"
+                }`}
               >
-                <ThumbsUp size={18} /> Like
+                <ThumbsUp size={18} /> {likesCount} {isLiked ? "Liked" : "Like"}
               </button>
+
+              {/* Save */}
               <button
                 onClick={() => lessonSaveMutation.mutate()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition  ${
+                  isSaved
+                    ? "bg-[#F08B42] text-white"
+                    : "bg-gray-100 hover:bg-[#F08B42] hover:text-white"
+                }`}
               >
-                <Bookmark size={18} /> Save
+                <Bookmark size={18} /> {lesson.saves || 0}{" "}
+                {isSaved ? "Saved" : "Save"}
               </button>
+
+              {/* Share */}
               <button
                 onClick={() => lessonShareMutation.mutate()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-[#F08B42] hover:text-white transition "
               >
                 <Share2 size={18} /> Share
               </button>
+
+              {/* Report */}
               <button
                 onClick={() => {
                   const reason = prompt("Why are you reporting this lesson?");
                   if (reason) lessonReportMutation.mutate(reason);
                 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-[#F08B42] hover:text-white transition"
               >
                 <Flag size={18} /> Report
               </button>
