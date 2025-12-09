@@ -1,6 +1,5 @@
 import React from "react";
 import { Search, Heart, MessageCircle, Eye, Lock } from "lucide-react";
-
 import Container from "../../Shared/Container";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";

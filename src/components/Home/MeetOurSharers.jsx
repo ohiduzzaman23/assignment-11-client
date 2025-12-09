@@ -1,6 +1,7 @@
 import React from "react";
 import { FaCrown } from "react-icons/fa";
 import Container from "../Shared/Container";
+import useAuth from "../../hooks/useAuth";
 
 const contributors = [
   {
@@ -32,6 +33,8 @@ const contributors = [
 ];
 
 const MeetOurSharers = () => {
+  const contributor = useAuth();
+  console.log(contributor.user);
   return (
     <section className="py-20 bg-[#FAF8F4]">
       <Container>

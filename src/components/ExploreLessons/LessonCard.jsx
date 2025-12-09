@@ -20,14 +20,14 @@ const LessonCard = ({ lesson }) => {
   return (
     <Link to={`/lessons/${lesson._id}`}>
       <motion.div
-        className="bg-white shadow-md hover:shadow-xl rounded-xl overflow-hidden cursor-pointer h-[380px]"
+        className="bg-white shadow-md hover:shadow-xl rounded-xl overflow-hidden cursor-pointer h-[340px]"
         whileHover={{ scale: 1.02 }}
       >
         <div className="relative h-48 w-full overflow-hidden">
           <img
             src={lesson.image}
             className={`w-full h-full object-cover transition-all duration-300 ${
-              lesson.premiumOnly ? "blur-sm brightness-75" : ""
+              lesson.premiumOnly ? "blur-sm brightness-85" : ""
             }`}
           />
 
