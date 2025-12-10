@@ -42,14 +42,14 @@ const LessonDetails = () => {
       setIsLiked(data.isLiked || false);
       setLikesCount(data.likes || 0);
 
-      // Increase view count (ignore error)
+      // Increase view
       axios
         .post(`${import.meta.env.VITE_API_URL}/lessons/${id}/view`)
         .catch(() => {});
     },
   });
 
-  // ---------- Fetch Contributors for Author Info -------
+  // ---------- Fetch Contributors -------
   const { data: contributors = [] } = useQuery({
     queryKey: ["contributors"],
     queryFn: async () => {
@@ -60,7 +60,7 @@ const LessonDetails = () => {
     },
   });
 
-  // Find author info from contributors list
+  // Find author info
   const lessonAuthor = contributors.find((c) => c.id === lesson?.authorId);
 
   // -------- Lesson Mutations -------

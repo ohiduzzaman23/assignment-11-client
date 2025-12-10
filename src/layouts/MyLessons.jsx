@@ -10,7 +10,6 @@ const MyLessons = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Replace with actual user identifier if needed
     axios
       .get(`${import.meta.env.VITE_API_URL}/lessons?userEmail=demo@example.com`)
       .then((res) => setLessons(res.data))

@@ -23,11 +23,17 @@ const stats = [
 ];
 
 const quickActions = [
-  { icon: PlusCircle, title: "Add New Lesson", desc: "Share your wisdom" },
+  {
+    icon: PlusCircle,
+    title: "Add New Lesson",
+    desc: "Share your wisdom",
+    link: "/add-lesson",
+  },
   {
     icon: LayoutList,
     title: "My Lessons",
     desc: "Manage your created lessons",
+    link: "/my-lessons",
   },
   { icon: Bookmark, title: "Favorites", desc: "View your saved lessons" },
   {
@@ -36,7 +42,6 @@ const quickActions = [
     desc: "Update your account details",
   },
 ];
-
 const DashboardLayout = ({ userName = "Demo User" }) => {
   const [recentLessons, setRecentLessons] = useState([]);
   const [menuOpen, setMenuOpen] = useState(null);
@@ -119,7 +124,24 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
               <div className="space-y-4">
                 {quickActions.map((qa, idx) => {
                   const Icon = qa.icon;
-                  return (
+                  return qa.link ? (
+                    <Link
+                      key={idx}
+                      to={qa.link}
+                      className="w-full flex items-center justify-between bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="bg-[#fff6e8] text-orange-500 p-3 rounded-lg">
+                          <Icon size={18} />
+                        </div>
+                        <div className="text-left">
+                          <div className="font-medium">{qa.title}</div>
+                          <div className="text-sm text-gray-500">{qa.desc}</div>
+                        </div>
+                      </div>
+                      <ArrowRight size={18} className="text-gray-400" />
+                    </Link>
+                  ) : (
                     <button
                       key={idx}
                       className="w-full flex items-center justify-between bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md"
@@ -157,7 +179,11 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
                   recentLessons.slice(0, 3).map((l, i) => (
                     <div
                       key={i}
-                      className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-4 items-center relative"
+                      className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-4 items-center relative cursor-pointer hover:shadow-md transition"
+                      onClick={(e) => {
+                        if (e.target.closest("button")) return;
+                        navigate(`/lessons/${l._id}`);
+                      }}
                     >
                       <img
                         src={l.image || "/mountain.jpg"}
