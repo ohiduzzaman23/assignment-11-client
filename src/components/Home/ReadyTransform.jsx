@@ -24,9 +24,7 @@ const ReadyTransform = () => {
           <Link
             to="/pricing"
             className="
-        bg-gradient-to-r from-[#F5A11B] to-[#F97516]
-        hover:from-[#F97516] hover:to-[#F5A11B]
-        text-white px-8 py-3 rounded-xl text-lg shadow-xl
+        my-g-btn px-8 py-3 rounded-xl text-lg shadow-xl
         "
           >
             Upgrade to Premium →

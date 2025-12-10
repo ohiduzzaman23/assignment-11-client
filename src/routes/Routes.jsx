@@ -27,8 +27,9 @@ export const router = createBrowserRouter([
       { path: "/explore-lessons", element: <ExploreLessons /> },
       { path: "/lessons/:id", element: <LessonDetails /> },
       { path: "/pricing", element: <Pricing /> },
-      { path: "my-lessons", element: <MyLessons /> },
+      { path: "/my-lessons", element: <MyLessons /> },
       { path: "/edit-lesson/:id", element: <EditLesson /> },
+      { path: "profile", element: <Profile /> },
       {
         path: "/dashboard",
         element: (
@@ -39,7 +40,6 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Statistics /> },
           { path: "manage-users", element: <ManageUsers /> },
-          { path: "profile", element: <Profile /> },
         ],
       },
     ],

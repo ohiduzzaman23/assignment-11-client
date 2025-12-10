@@ -65,7 +65,7 @@ export default function Carousel() {
                       {slide.subtitle}
                     </p>
 
-                    <button className="bg-[#F4A031] hover:bg-[#d88928] transition-all px-5 py-2 rounded-md font-semibold">
+                    <button className="my-g-btn px-5 py-2 rounded-md font-semibold">
                       {slide.btn}
                     </button>
                   </div>

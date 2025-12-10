@@ -39,7 +39,7 @@ const quickActions = [
   {
     icon: Settings,
     title: "Profile Settings",
-    desc: "Update your account details",
+    link: "/profile",
   },
 ];
 const DashboardLayout = ({ userName = "Demo User" }) => {
@@ -79,10 +79,7 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
               </p>
             </div>
             <div className="mt-1">
-              <Link
-                to="/pricing"
-                className="px-4 py-2 bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl shadow-md hover:from-[#F59E0B] hover:to-[#F97316] hover:scale-105 transition-all duration-300"
-              >
+              <Link to="/pricing" className="px-4 py-2 my-g-btn">
                 <FaCrown className="text-white text-lg inline mr-2" />
                 Upgrade to Premium
               </Link>

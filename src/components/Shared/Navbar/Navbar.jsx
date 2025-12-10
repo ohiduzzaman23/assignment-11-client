@@ -69,10 +69,7 @@ const Navbar = () => {
             {/* right - User Menu */}
             <div className="relative">
               <div className="flex flex-row items-center gap-3">
-                <Link
-                  to="/pricing"
-                  className="btn bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl"
-                >
+                <Link to="/pricing" className="btn my-g-btn">
                   <FaCrown className="text-white text-lg" /> Upgrade
                 </Link>
                 <Link to="/add-lesson" className="btn rounded-xl">
@@ -81,17 +78,16 @@ const Navbar = () => {
 
                 <div
                   onClick={() => setIsOpen(!isOpen)}
-                  className="p-4 md:py-1 md:px-2 border border-neutral-200 flex items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition"
+                  className="p-4 bg-[#FAF2E4] md:py-1 md:px-1 border border-[#FAE8CE] flex items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition"
                 >
-                  <AiOutlineMenu />
                   <div className="hidden md:block">
                     <img
                       className="rounded-full"
                       referrerPolicy="no-referrer"
                       src={user?.photoURL || avatarImg}
                       alt="profile"
-                      height="35"
-                      width="35"
+                      height="30"
+                      width="30"
                     />
                   </div>
                 </div>

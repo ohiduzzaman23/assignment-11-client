@@ -20,3 +20,6 @@
 .my-btn {
   @apply btn bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl hover:shadow-sm;
 }
+.my-g-btn {
+  @apply bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl shadow-md hover:from-[#F59E0B] hover:to-[#cc5804] hover:scale-105 transition-all duration-300;
+}
