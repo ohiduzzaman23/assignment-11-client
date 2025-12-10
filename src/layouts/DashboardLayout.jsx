@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BookOpen,
   Eye,
@@ -6,12 +6,13 @@ import {
   Bookmark,
   PlusCircle,
   LayoutList,
-  Star,
   Settings,
   ArrowRight,
+  MoreHorizontal,
 } from "lucide-react";
 import { FaCrown } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import Container from "../components/Shared/Container";
 
 const stats = [
@@ -22,11 +23,7 @@ const stats = [
 ];
 
 const quickActions = [
-  {
-    icon: PlusCircle,
-    title: "Add New Lesson",
-    desc: "Share your wisdom with the community",
-  },
+  { icon: PlusCircle, title: "Add New Lesson", desc: "Share your wisdom" },
   {
     icon: LayoutList,
     title: "My Lessons",
@@ -40,39 +37,33 @@ const quickActions = [
   },
 ];
 
-const recentLessons = [
-  {
-    title: "The Power of Saying No: Protecting Your Energy",
-    desc: "Learning to set boundaries changed my life. This lesson explores how saying no to others can mean saying yes to yourself.",
-    img: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=60",
-    views: 1205,
-    likes: 234,
-    comments: 89,
-  },
-  {
-    title: "Embracing Failure as a Teacher",
-    desc: "My biggest failures taught me more than any success ever could. Here is what I learned from hitting rock bottom.",
-    img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=60",
-    views: 2341,
-    likes: 456,
-    comments: 178,
-  },
-  {
-    title: "Finding Peace in Uncertainty",
-    desc: "When everything feels chaotic, here is how I found my center and learned to embrace the unknown.",
-    img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=60",
-    views: 1567,
-    likes: 312,
-    comments: 145,
-  },
-];
-
 const DashboardLayout = ({ userName = "Demo User" }) => {
+  const [recentLessons, setRecentLessons] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/lessons?limit=5`)
+      .then((res) => setRecentLessons(res.data))
+      .catch((err) => console.error("Failed to fetch lessons:", err));
+  }, []);
+
+  const handleDelete = async (id) => {
+    if (!confirm("Are you sure you want to delete this lesson?")) return;
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/lessons/${id}`);
+      setRecentLessons((prev) => prev.filter((l) => l._id !== id));
+    } catch (err) {
+      console.error("Failed to delete lesson:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f7f4ee] text-gray-800">
       <Container>
         <div className="px-6 py-12">
-          {/* Top bar */}
+          {/* Top Bar */}
           <div className="flex items-start justify-between gap-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-semibold text-[#2b2b2b]">
@@ -82,12 +73,10 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
                 Here's an overview of your LifeLessons journey
               </p>
             </div>
-
             <div className="mt-1">
               <Link
                 to="/pricing"
-                className="px-4 py-2 bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl shadow-md
-  hover:from-[#F59E0B] hover:to-[#F97316] hover:scale-105 transition-all duration-300"
+                className="px-4 py-2 bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl shadow-md hover:from-[#F59E0B] hover:to-[#F97316] hover:scale-105 transition-all duration-300"
               >
                 <FaCrown className="text-white text-lg inline mr-2" />
                 Upgrade to Premium
@@ -122,12 +111,11 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
             })}
           </div>
 
-          {/* Main content */}
+          {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
             {/* Left: Quick Actions */}
             <div className="lg:col-span-1">
               <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-
               <div className="space-y-4">
                 {quickActions.map((qa, idx) => {
                   const Icon = qa.icon;
@@ -152,47 +140,83 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
               </div>
             </div>
 
-            {/* Right: Recent Lessons (span 2 cols) */}
+            {/* Right: Recent Lessons */}
             <div className="lg:col-span-2">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Your Recent Lessons</h3>
-                <a href="#" className="text-sm text-gray-600 hover:underline">
+                <Link
+                  to="/my-lessons"
+                  className="text-sm text-gray-600 hover:underline"
+                >
                   View All →
-                </a>
+                </Link>
               </div>
 
               <div className="space-y-4">
-                {recentLessons.map((l, i) => (
-                  <div
-                    key={i}
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-4 items-center"
-                  >
-                    <img
-                      src={l.img}
-                      alt={l.title}
-                      className="w-36 h-20 object-cover rounded-md flex-shrink-0"
-                    />
-
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-800">{l.title}</h4>
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                        {l.desc}
-                      </p>
-
-                      <div className="flex items-center gap-4 text-sm text-gray-500 mt-3">
-                        <div className="flex items-center gap-1">
-                          <Eye size={14} /> {l.views}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Heart size={14} /> {l.likes}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Bookmark size={14} /> {l.comments}
+                {recentLessons.length ? (
+                  recentLessons.slice(0, 3).map((l, i) => (
+                    <div
+                      key={i}
+                      className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-4 items-center relative"
+                    >
+                      <img
+                        src={l.image || "/mountain.jpg"}
+                        alt={l.title}
+                        className="w-36 h-20 object-cover rounded-md flex-shrink-0"
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-800">
+                          {l.title}
+                        </h4>
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                          {l.content || l.desc || "No description"}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500 mt-3">
+                          <div className="flex items-center gap-1">
+                            <Eye size={14} /> {l.views || 0}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Heart size={14} /> {l.likes || 0}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Bookmark size={14} /> {l.comments?.length || 0}
+                          </div>
                         </div>
                       </div>
+
+                      {/* 3-dot menu */}
+                      <div className="relative">
+                        <button
+                          className="p-2 hover:bg-gray-100 rounded-full"
+                          onClick={() =>
+                            setMenuOpen(menuOpen === l._id ? null : l._id)
+                          }
+                        >
+                          <MoreHorizontal size={18} />
+                        </button>
+
+                        {menuOpen === l._id && (
+                          <div className="absolute right-0 top-8 bg-white shadow-lg border border-gray-200 rounded-md w-32 z-10">
+                            <button
+                              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                              onClick={() => navigate(`/edit-lesson/${l._id}`)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
+                              onClick={() => handleDelete(l._id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-gray-500">No recent lessons yet.</p>
+                )}
               </div>
             </div>
           </div>
@@ -201,4 +225,5 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
     </div>
   );
 };
+
 export default DashboardLayout;
