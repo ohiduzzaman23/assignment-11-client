@@ -49,7 +49,7 @@ const Navbar = () => {
   );
 
   return (
-    <div className="fixed w-full bg-white z-10 shadow-sm">
+    <div className="fixed w-full bg-white z-50 shadow-sm">
       <div className="py-4">
         <Container>
           <div className="flex items-center justify-between gap-3">
@@ -90,8 +90,8 @@ const Navbar = () => {
                       referrerPolicy="no-referrer"
                       src={user?.photoURL || avatarImg}
                       alt="profile"
-                      height="30"
-                      width="30"
+                      height="35"
+                      width="35"
                     />
                   </div>
                 </div>

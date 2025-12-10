@@ -1,6 +1,7 @@
 import { Button } from "@headlessui/react";
 import React from "react";
 import { FaCrown } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const ReadyTransform = () => {
   return (
@@ -20,7 +21,8 @@ const ReadyTransform = () => {
         </p>
 
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-10">
-          <Button
+          <Link
+            to="/pricing"
             className="
         bg-gradient-to-r from-[#F5A11B] to-[#F97516]
         hover:from-[#F97516] hover:to-[#F5A11B]
@@ -28,10 +30,13 @@ const ReadyTransform = () => {
         "
           >
             Upgrade to Premium →
-          </Button>
-          <Button className="bg-gradient-to-br from-yellow-200 to-orange-300 text-black px-8 py-3 rounded-xl text-lg shadow-xl font-semibold">
+          </Link>
+          <Link
+            to="/explore-lessons"
+            className="bg-gradient-to-br from-yellow-200 to-orange-300 text-black px-8 py-3 rounded-xl text-lg shadow-xl font-semibold"
+          >
             Browse Free Lessons
-          </Button>
+          </Link>
         </div>
 
         <div className="flex items-center justify-center gap-10 text-lg font-semibold">

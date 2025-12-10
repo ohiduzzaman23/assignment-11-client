@@ -20,7 +20,7 @@ const LessonCard = ({ lesson }) => {
   return (
     <Link to={`/lessons/${lesson._id}`}>
       <motion.div
-        className="bg-white shadow-md hover:shadow-xl rounded-xl overflow-hidden cursor-pointer h-[340px]"
+        className="bg-white shadow-md hover:shadow-xl rounded-xl overflow-hidden cursor-pointer h-[360px]"
         whileHover={{ scale: 1.02 }}
       >
         <div className="relative h-48 w-full overflow-hidden">

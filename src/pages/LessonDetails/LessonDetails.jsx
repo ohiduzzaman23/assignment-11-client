@@ -38,24 +38,32 @@ const LessonDetails = () => {
     },
     enabled: !!id,
     onSuccess: (data) => {
-      // set local UI states
       setIsSaved(data.isSaved || false);
       setIsLiked(data.isLiked || false);
       setLikesCount(data.likes || 0);
 
-      // increase view
-
+      // Increase view count (ignore error)
       axios
         .post(`${import.meta.env.VITE_API_URL}/lessons/${id}/view`)
-        .catch((e) => {
-          console.debug("view increment failed", e?.message || e);
-        });
+        .catch(() => {});
     },
   });
 
-  // -------- Lesson Mutations -------
+  // ---------- Fetch Contributors for Author Info -------
+  const { data: contributors = [] } = useQuery({
+    queryKey: ["contributors"],
+    queryFn: async () => {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/contributors`
+      );
+      return res.data;
+    },
+  });
 
-  // Like lesson
+  // Find author info from contributors list
+  const lessonAuthor = contributors.find((c) => c.id === lesson?.authorId);
+
+  // -------- Lesson Mutations -------
   const lessonLikeMutation = useMutation({
     mutationFn: async () =>
       axios.post(
@@ -64,22 +72,16 @@ const LessonDetails = () => {
         { headers: authHeaders }
       ),
     onMutate: () => {
-      // optimistic UI update
       setIsLiked((prev) => !prev);
       setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
     },
-    onError: (err) => {
-      // rollback
+    onError: () => {
       setIsLiked((prev) => !prev);
       setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
-      console.error("Like failed:", err?.response?.data || err.message || err);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["lesson", id]);
-    },
+    onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
   });
 
-  // Save lesson
   const lessonSaveMutation = useMutation({
     mutationFn: async () =>
       axios.post(`${import.meta.env.VITE_API_URL}/lessons/${id}/save`),
@@ -87,9 +89,6 @@ const LessonDetails = () => {
       queryClient.invalidateQueries(["lesson", id]);
       queryClient.invalidateQueries(["lessons-worth"]);
       setIsSaved((prev) => !prev);
-    },
-    onError: (err) => {
-      console.error("Save failed:", err?.response?.data || err.message || err);
     },
   });
 
@@ -119,12 +118,6 @@ const LessonDetails = () => {
       queryClient.invalidateQueries(["lesson", id]);
       setNewComment("");
     },
-    onError: (err) => {
-      console.error(
-        "Post comment failed:",
-        err?.response?.data || err.message || err
-      );
-    },
   });
 
   const replyMutation = useMutation({
@@ -140,9 +133,6 @@ const LessonDetails = () => {
       queryClient.invalidateQueries(["lesson", id]);
       setReplyText({});
     },
-    onError: (err) => {
-      console.error("Reply failed:", err?.response?.data || err.message || err);
-    },
   });
 
   const likeCommentMutation = useMutation({
@@ -155,12 +145,6 @@ const LessonDetails = () => {
         { headers: authHeaders }
       ),
     onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
-    onError: (err) => {
-      console.error(
-        "Like comment failed:",
-        err?.response?.data || err.message || err
-      );
-    },
   });
 
   // --- Loading / Error ------
@@ -168,10 +152,9 @@ const LessonDetails = () => {
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
   if (!lesson) return <p>Lesson not found</p>;
 
-  // ----- Conditional Premium ------
   if (lesson.premiumOnly) return <PremiumCard />;
-
-  // ------ Render ---
+  console.log(lesson.authorAvatar);
+  // ------ Render -----
   return (
     <div className="min-h-screen bg-[#f6f1e7]">
       {/* Header */}
@@ -226,7 +209,6 @@ const LessonDetails = () => {
 
             {/* Lesson Actions */}
             <div className="flex gap-4 mt-8">
-              {/* Like */}
               <button
                 onClick={() => lessonLikeMutation.mutate()}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl transition  ${
@@ -238,7 +220,6 @@ const LessonDetails = () => {
                 <ThumbsUp size={18} /> {likesCount} {isLiked ? "Liked" : "Like"}
               </button>
 
-              {/* Save */}
               <button
                 onClick={() => lessonSaveMutation.mutate()}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl transition  ${
@@ -251,7 +232,6 @@ const LessonDetails = () => {
                 {isSaved ? "Saved" : "Save"}
               </button>
 
-              {/* Share */}
               <button
                 onClick={() => lessonShareMutation.mutate()}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-[#F08B42] hover:text-white transition "
@@ -259,7 +239,6 @@ const LessonDetails = () => {
                 <Share2 size={18} /> Share
               </button>
 
-              {/* Report */}
               <button
                 onClick={() => {
                   const reason = prompt("Why are you reporting this lesson?");
@@ -278,7 +257,6 @@ const LessonDetails = () => {
               Comments
             </h2>
 
-            {/* New Comment */}
             <textarea
               className="w-full border border-gray-300 rounded-xl p-4 text-gray-700 focus:ring-2 focus:ring-orange-200 focus:outline-none"
               rows="3"
@@ -294,7 +272,6 @@ const LessonDetails = () => {
               {commentMutation.isLoading ? "Posting..." : "Post Comment"}
             </button>
 
-            {/* Comment List */}
             <div className="mt-6 space-y-6 max-h-[400px] overflow-auto">
               {lesson.comments?.length ? (
                 lesson.comments.map((c) => (
@@ -311,7 +288,6 @@ const LessonDetails = () => {
                         </p>
                         <p className="text-gray-700">{c.text}</p>
 
-                        {/* Like + Reply */}
                         <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                           <button
                             onClick={() => likeCommentMutation.mutate(c._id)}
@@ -331,7 +307,6 @@ const LessonDetails = () => {
                           </button>
                         </div>
 
-                        {/* Reply Box */}
                         {replyText[c._id] !== undefined && (
                           <div className="mt-2 flex flex-col gap-2">
                             <textarea
@@ -363,7 +338,6 @@ const LessonDetails = () => {
                           </div>
                         )}
 
-                        {/* Replies */}
                         {c.replies?.length > 0 && (
                           <div className="mt-2 pl-6 flex flex-col gap-2">
                             {c.replies.map((r) => (
@@ -401,15 +375,19 @@ const LessonDetails = () => {
             <p className="font-medium text-gray-500 mb-2">Written by</p>
             <div className="flex items-center gap-3 mb-4">
               <img
-                src={lesson.authorImage || "https://i.pravatar.cc/60?img=7"}
+                src={
+                  lessonAuthor?.avatar ||
+                  lesson.authorImage ||
+                  "https://i.pravatar.cc/60?img=7"
+                }
                 className="w-14 h-14 rounded-full"
               />
               <div>
                 <p className="font-semibold text-gray-700">
-                  {lesson.author || "Unknown Author"}
+                  {lessonAuthor?.name || lesson.author || "Unknown Author"}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {lesson.authorLessonCount || 12} lessons shared
+                  {lesson.authorLessonCount || 0} lessons shared
                 </p>
               </div>
             </div>
