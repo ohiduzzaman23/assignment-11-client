@@ -13,10 +13,10 @@ const LessonCard = ({ lesson }) => {
         titleRef.current.scrollHeight <= titleRef.current.clientHeight;
       setLineClamp(isSingleLine ? 3 : 2);
     }
-  }, [lesson.title]);
+  }, [lesson?.title]);
 
   if (!lesson?._id) return null;
-  console.log();
+
   return (
     <Link to={`/lessons/${lesson._id}`}>
       <motion.div
@@ -25,10 +25,11 @@ const LessonCard = ({ lesson }) => {
       >
         <div className="relative h-48 w-full overflow-hidden">
           <img
-            src={lesson.image}
+            src={lesson.image || "/mountain.jpg"}
             className={`w-full h-full object-cover transition-all duration-300 ${
               lesson.premiumOnly ? "blur-sm brightness-85" : ""
             }`}
+            alt={lesson.title || "Lesson Image"}
           />
 
           <span
@@ -38,7 +39,7 @@ const LessonCard = ({ lesson }) => {
                 : "bg-white"
             }`}
           >
-            {lesson.tone}
+            {lesson.tone || "General"}
           </span>
 
           {lesson.premiumOnly && (
@@ -52,22 +53,24 @@ const LessonCard = ({ lesson }) => {
 
         <div className="p-4 flex flex-col justify-between h-[132px]">
           <div>
-            <p className="text-xs text-gray-500 mb-1">{lesson.tag}</p>
+            <p className="text-xs text-gray-500 mb-1">
+              {lesson.tag || "General"}
+            </p>
 
             <h3
               ref={titleRef}
               className="font-semibold text-lg mb-2 line-clamp-1"
             >
-              {lesson.title}
+              {lesson.title || "Untitled Lesson"}
             </h3>
 
             <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-              {lesson.description}
+              {lesson.description || "No description available."}
             </p>
           </div>
 
           <div className="flex items-center justify-between text-gray-500 text-sm">
-            <span>👤 {lesson.author}</span>
+            <span>👤 {lesson.author || "Anonymous"}</span>
 
             <div className="flex items-center gap-3">
               {/* Likes */}
@@ -75,7 +78,7 @@ const LessonCard = ({ lesson }) => {
                 <Heart size={14} /> {lesson.likes || 0}
               </span>
 
-              {/* Comments count (fixed here!) */}
+              {/* Comments count */}
               <span className="flex items-center gap-1">
                 <MessageCircle size={14} />{" "}
                 {Array.isArray(lesson.comments) ? lesson.comments.length : 0}

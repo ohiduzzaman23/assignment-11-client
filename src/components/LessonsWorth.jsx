@@ -3,9 +3,10 @@ import { GoArrowRight } from "react-icons/go";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Container from "./Shared/Container";
+import { Link } from "react-router-dom";
 
 const LessonsWorth = () => {
-  // Fetch top saved lessons
+  // top saved lessons
   const { data: lessons = [], isLoading } = useQuery({
     queryKey: ["lessons-worth"],
     queryFn: async () => {
@@ -18,7 +19,6 @@ const LessonsWorth = () => {
 
   if (isLoading) return <p className="text-center py-10">Loading...</p>;
 
-  // Calculate rank based on saves
   const sortedLessons = [...lessons].sort(
     (a, b) => (b.saves || 0) - (a.saves || 0)
   );
@@ -45,17 +45,18 @@ const LessonsWorth = () => {
               </p>
             </div>
 
-            {/* BUTTON */}
+            {/* button */}
             <button className="btn rounded-2xl flex items-center gap-2 group">
               See All Saved
               <GoArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
             </button>
           </div>
 
-          {/* LESSON LIST */}
+          {/* Lesson list */}
           <div className="space-y-6">
             {sortedLessons.map((item) => (
-              <div
+              <Link
+                to={`/lessons/${item._id}`}
                 key={item._id}
                 className="bg-[#F7F6F2] border border-gray-300 rounded-2xl p-6 flex flex-col lg:flex-row items-center gap-6 hover:shadow-md transition"
               >
@@ -106,7 +107,7 @@ const LessonsWorth = () => {
                     <p className="text-xs text-slate-500">Author</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

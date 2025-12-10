@@ -18,7 +18,7 @@ const LessonDetails = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
 
-  // prepare auth header if token exists
+  // token exists
   const token = localStorage.getItem("token");
   const authHeaders = token ? { authorization: `Bearer ${token}` } : {};
 
@@ -171,7 +171,7 @@ const LessonDetails = () => {
   // ----- Conditional Premium ------
   if (lesson.premiumOnly) return <PremiumCard />;
 
-  // ------ Render ---  (UI unchanged)
+  // ------ Render ---
   return (
     <div className="min-h-screen bg-[#f6f1e7]">
       {/* Header */}

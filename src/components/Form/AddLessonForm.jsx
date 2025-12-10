@@ -1,32 +1,18 @@
-import { Upload, Globe, ShieldCheck } from "lucide-react";
+import React, { useRef } from "react";
 import { useForm } from "react-hook-form";
-import LoadingSpinner from "../Shared/LoadingSpinner";
-import ErrorPage from "../../pages/ErrorPage";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { imageUpload } from "../../utils";
-import { useRef } from "react";
+import LoadingSpinner from "../Shared/LoadingSpinner";
+import ErrorPage from "../../pages/ErrorPage";
+import { Upload, Globe, ShieldCheck } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
+import { imageUpload } from "../../utils";
 
 const AddLessonForm = () => {
   const contributor = useAuth();
-  const {
-    isPending,
-    isError,
-    mutateAsync,
-    reset: mutationReset,
-  } = useMutation({
-    mutationFn: async (payload) =>
-      await axios.post(`${import.meta.env.VITE_API_URL}/lessons`, payload),
-    onSuccess: () => {
-      toast.success("Lesson Added Successfully");
-      mutationReset();
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
+  const fileInputRef = useRef(null);
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -34,11 +20,27 @@ const AddLessonForm = () => {
     setValue,
     formState: { errors, isValid },
     reset,
-  } = useForm({
-    mode: "onChange",
-  });
+  } = useForm({ mode: "onChange" });
 
-  const fileInputRef = useRef(null);
+  const {
+    mutateAsync,
+    isLoading,
+    isError,
+    reset: mutationReset,
+  } = useMutation({
+    mutationFn: async (payload) =>
+      await axios.post(`${import.meta.env.VITE_API_URL}/lessons`, payload),
+    onSuccess: () => {
+      toast.success("Lesson Added Successfully");
+      queryClient.invalidateQueries(["lessons"]);
+      reset();
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error("Failed to add lesson");
+    },
+  });
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -46,59 +48,41 @@ const AddLessonForm = () => {
   };
 
   const onSubmit = async (data) => {
-    const {
-      title,
-      description,
-      content,
-      category,
-      tone,
-      coverImage,
-      publicLesson,
-      premiumOnly,
-    } = data;
-
     let imageUrl = "";
-
-    if (coverImage && typeof coverImage !== "string") {
-      imageUrl = await imageUpload(coverImage);
-    } else if (typeof coverImage === "string") {
-      imageUrl = coverImage;
+    if (data.coverImage && typeof data.coverImage !== "string") {
+      imageUrl = await imageUpload(data.coverImage);
+    } else if (typeof data.coverImage === "string") {
+      imageUrl = data.coverImage;
     }
 
     const lessonData = {
-      title,
-      description,
-      content,
-      category,
-      tone,
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      category: data.category,
+      tone: data.tone,
       image: imageUrl,
-      publicLesson: !!publicLesson,
-      premiumOnly: !!premiumOnly,
-      user: contributor?.user?.email,
-      displayName: contributor?.user?.displayName || "Anonymous",
-      avatar: contributor?.user?.photoURL || "/images/default.jpg",
+      publicLesson: !!data.publicLesson,
+      premiumOnly: !!data.premiumOnly,
+      author: contributor?.user?.displayName || "Anonymous",
+      authorAvatar: contributor?.user?.photoURL || "/images/default.jpg",
     };
 
     await mutateAsync(lessonData);
-    reset();
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  if (isPending) return <LoadingSpinner />;
+  if (isLoading) return <LoadingSpinner />;
   if (isError) return <ErrorPage />;
 
   return (
     <div className="min-h-screen w-full bg-[#F7F6F2] p-6 flex justify-center">
       <div className="w-full max-w-4xl rounded-2xl p-8 space-y-10">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            Create a Life Lesson
-          </h1>
-          <p className="text-gray-500 mt-1">
-            Share your wisdom and inspire others with your experiences
-          </p>
-        </div>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Create a Life Lesson
+        </h1>
+        <p className="text-gray-500 mt-1">
+          Share your wisdom and inspire others with your experiences
+        </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
           {/* Basic Information */}
@@ -107,29 +91,22 @@ const AddLessonForm = () => {
               Basic Information
             </h2>
 
-            {/* Title */}
             <div className="space-y-1">
               <label className="font-medium text-gray-700">Title *</label>
               <input
                 type="text"
                 placeholder="What's the core message of your lesson?"
-                className="w-full border border-gray-300 rounded-lg p-3 bg-white focus:ring focus:ring-yellow-300 outline-none "
+                className="w-full border border-gray-300 rounded-lg p-3 bg-white focus:ring focus:ring-yellow-300 outline-none"
                 {...register("title", {
                   required: "Title is required",
-                  maxLength: {
-                    value: 80,
-                    message: "Title cannot be too long",
-                  },
+                  maxLength: 80,
                 })}
               />
               {errors.title && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.title.message}
-                </p>
+                <p className="text-red-500 text-xs">{errors.title.message}</p>
               )}
             </div>
 
-            {/* Short Description */}
             <div className="space-y-1">
               <label className="font-medium text-gray-700">
                 Short Description *
@@ -143,7 +120,6 @@ const AddLessonForm = () => {
               />
             </div>
 
-            {/* Full Content */}
             <div className="space-y-1">
               <label className="font-medium text-gray-700">
                 Full Content *
@@ -151,9 +127,7 @@ const AddLessonForm = () => {
               <textarea
                 placeholder="Share your story and the lesson you learned..."
                 className="w-full border border-gray-300 rounded-lg p-3 h-40 bg-white focus:ring focus:ring-yellow-300 outline-none"
-                {...register("content", {
-                  required: "Content is required",
-                })}
+                {...register("content", { required: "Content is required" })}
               />
             </div>
           </div>
@@ -163,7 +137,6 @@ const AddLessonForm = () => {
             <h2 className="text-xl font-semibold text-gray-800">
               Classification
             </h2>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
                 <label className="font-medium text-gray-700">Category *</label>
@@ -213,17 +186,13 @@ const AddLessonForm = () => {
           {/* Cover Image */}
           <div className="space-y-4 p-6 rounded-xl bg-[#F7F6F2] shadow-[0_0_20px_rgba(0,0,0,0.15)]">
             <h2 className="text-xl font-semibold text-gray-800">Cover Image</h2>
-
             <div className="flex items-center gap-3">
-              {/* Text input */}
               <input
                 type="text"
                 placeholder="https://example.com/image.jpg"
                 className="flex-1 border border-gray-300 rounded-lg p-3 bg-white focus:ring focus:ring-yellow-300 outline-none"
                 {...register("coverImage")}
               />
-
-              {/* Hidden file input */}
               <input
                 type="file"
                 {...register("coverImage")}
@@ -232,8 +201,6 @@ const AddLessonForm = () => {
                 accept="image/*"
                 onChange={handleFileSelect}
               />
-
-              {/* Button file input */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current.click()}
@@ -242,10 +209,6 @@ const AddLessonForm = () => {
                 <Upload size={18} /> Upload
               </button>
             </div>
-
-            <p className="text-gray-500 text-sm">
-              Add a compelling image that represents your lesson
-            </p>
           </div>
 
           {/* Visibility */}
@@ -293,7 +256,7 @@ const AddLessonForm = () => {
                 </div>
 
                 <div className="relative">
-                  {/* Hidden Checkbox — THIS must be registered */}
+                  {/* Hidden Checkbox */}
                   <input
                     type="checkbox"
                     {...register("premiumOnly")}
@@ -315,7 +278,6 @@ const AddLessonForm = () => {
             >
               Cancel
             </button>
-
             <button
               type="submit"
               disabled={!isValid}

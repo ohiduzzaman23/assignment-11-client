@@ -16,12 +16,13 @@ const MeetOurSharers = () => {
   });
 
   if (isLoading) return <p>Loading contributors...</p>;
+  if (!contributors.length) return <p>No contributors yet.</p>;
 
-  const maxLessons = Math.max(...contributors.map((c) => c.lessons || 0));
   return (
     <section className="py-20 bg-[#FAF8F4]">
       <Container>
         <div className="grid md:grid-cols-2 gap-12">
+          {/* Left Side */}
           <div>
             <p className="text-sm text-[#D2922E] font-semibold flex items-center gap-2">
               <span>🏆</span> TOP CONTRIBUTORS
@@ -33,76 +34,78 @@ const MeetOurSharers = () => {
               These amazing individuals have shared the most valuable lessons,
               helping thousands of people grow and learn from their experiences.
             </p>
-            <div className="grid grid-cols-3 mt-10">
-              <div className="text-center">
-                <h2 className="text-[#F49F32] text-3xl font-semibold">500+</h2>
+
+            <div className="grid grid-cols-3 mt-10 text-center">
+              <div>
+                <h2 className="text-[#F49F32] text-3xl font-semibold">
+                  {contributors.reduce((acc, c) => acc + c.lessons, 0)}
+                </h2>
                 <p>Lessons Shared</p>
               </div>
-              <div className="text-center">
+              <div>
                 <h2 className="text-[#F49F32] text-3xl font-semibold">50K+</h2>
                 <p>Lives Touched</p>
               </div>
-              <div className="text-center">
-                <h2 className="text-[#F49F32] text-3xl font-semibold">100+</h2>
+              <div>
+                <h2 className="text-[#F49F32] text-3xl font-semibold">
+                  {contributors.length}
+                </h2>
                 <p>Contributors</p>
               </div>
             </div>
           </div>
 
-          {/* Right side */}
+          {/* Right Side */}
           <div className="flex flex-col gap-5">
-            {contributors
-              .sort((a, b) => b.lessons - a.lessons)
-              .map((person, index) => {
-                const isTop = person.lessons === maxLessons;
-                return (
-                  <div
-                    key={person._id || index}
-                    className={`flex items-center justify-between bg-[#FBFBF8] rounded-xl shadow-sm p-5
-                      border ${
-                        isTop ? "border-[#F5A623] shadow-md" : "border-gray-200"
+            {contributors.map((person, index) => {
+              const isTop = index === 0;
+              return (
+                <div
+                  key={person.id || index}
+                  className={`flex items-center justify-between bg-[#FBFBF8] rounded-xl shadow-sm p-5 border ${
+                    isTop ? "border-[#F5A623] shadow-md" : "border-gray-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Rank */}
+                    <span
+                      className={`w-10 h-10 flex items-center justify-center text-gray-700 font-semibold rounded-full ${
+                        isTop ? "bg-[#F5A623]" : "bg-[#EEEBE8]"
                       }`}
-                  >
-                    {/* Left */}
-                    <div className="flex items-center gap-4">
-                      {/* Rank */}
-                      <span
-                        className={`w-10 h-10 flex items-center justify-center text-gray-500 font-semibold rounded-full 
-                          ${isTop ? "bg-[#F5A623]" : "bg-[#EEEBE8]"}`}
-                      >
-                        #{index + 1}
-                      </span>
+                    >
+                      #{index + 1}
+                    </span>
 
-                      {/* Avatar */}
-                      <img
-                        src={person.avatar || "/images/default.jpg"}
-                        className="w-12 h-12 rounded-full object-cover"
-                        alt={person.name}
-                      />
+                    {/* Avatar */}
+                    <img
+                      src={person.avatar || "/images/default.jpg"}
+                      alt={person.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
 
-                      {/* Info */}
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <h4 className="font-semibold">{person.name}</h4>
-                          {isTop && (
-                            <FaCrown className="text-[#F5A623] text-sm" />
-                          )}
-                        </div>
-                        <p className="text-gray-600 text-sm">
-                          ♢ {person.lessons} lessons shared
-                        </p>
+                    {/* Info */}
+                    <div>
+                      <div className="flex items-center gap-1">
+                        <h4 className="font-semibold">{person.name}</h4>
+                        {isTop && (
+                          <FaCrown className="text-[#F5A623] text-sm" />
+                        )}
                       </div>
+                      <p className="text-gray-600 text-sm">
+                        ♢ {person.lessons} lesson
+                        {person.lessons !== 1 ? "s" : ""} shared
+                      </p>
                     </div>
-
-                    {/* Right Side Badge */}
-                    {isTop && (
-                      <span className="bg-[#F5A623] text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        Top Contributor
-                      </span>
-                    )}
                   </div>
-                );
-              })}
+
+                  {isTop && (
+                    <span className="bg-[#F5A623] text-white px-3 py-1 rounded-full text-xs font-semibold">
+                      Top Contributor
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </Container>
