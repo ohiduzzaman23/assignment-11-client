@@ -109,9 +109,7 @@ const Pricing = () => {
             ))}
           </ul>
 
-          <button className="w-full py-3 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600">
-            Upgrade Now
-          </button>
+          <button className="w-full py-3 my-g-btn">Upgrade Now</button>
         </motion.div>
       </div>
 
