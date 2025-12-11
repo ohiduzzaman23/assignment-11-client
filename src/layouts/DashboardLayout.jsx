@@ -14,6 +14,7 @@ import { FaCrown } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Container from "../components/Shared/Container";
+import useAuth from "../hooks/useAuth";
 
 const stats = [
   { icon: BookOpen, label: "Lessons Created", value: 5 },
@@ -22,30 +23,52 @@ const stats = [
   { icon: Bookmark, label: "Total Saves", value: 67 },
 ];
 
-const quickActions = [
-  {
-    icon: PlusCircle,
-    title: "Add New Lesson",
-    desc: "Share your wisdom",
-    link: "/add-lesson",
-  },
-  {
-    icon: LayoutList,
-    title: "My Lessons",
-    desc: "Manage your created lessons",
-    link: "/my-lessons",
-  },
-  { icon: Bookmark, title: "Favorites", desc: "View your saved lessons" },
-  {
-    icon: Settings,
-    title: "Profile Settings",
-    link: "/profile",
-  },
-];
 const DashboardLayout = ({ userName = "Demo User" }) => {
   const [recentLessons, setRecentLessons] = useState([]);
   const [menuOpen, setMenuOpen] = useState(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Quick Actions
+  const quickActions = [
+    {
+      icon: PlusCircle,
+      title: "Add New Lesson",
+      desc: "Share your wisdom",
+      link: "/add-lesson",
+    },
+    {
+      icon: LayoutList,
+      title: "My Lessons",
+      desc: "Manage your created lessons",
+      link: "/my-lessons",
+    },
+    {
+      icon: Bookmark,
+      title: "Favorites",
+      desc: "View your saved lessons",
+      link: "/favorites",
+    },
+    {
+      icon: Settings,
+      title: "Profile Settings",
+      link: "/profile",
+    },
+    {
+      icon: Settings,
+      title: "Admin",
+      link: "/admin",
+    },
+  ];
+
+  if (user?.role === "admin") {
+    quickActions.push({
+      icon: Settings,
+      title: "Admin Dashboard",
+      desc: "Manage users & lessons",
+      link: "/admin",
+    });
+  }
 
   useEffect(() => {
     axios
@@ -63,7 +86,6 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
       console.error("Failed to delete lesson:", err);
     }
   };
-
   return (
     <div className="min-h-screen bg-[#f7f4ee] text-gray-800">
       <Container>
