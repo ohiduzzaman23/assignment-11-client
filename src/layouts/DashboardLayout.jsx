@@ -9,6 +9,7 @@ import {
   Settings,
   ArrowRight,
   MoreHorizontal,
+  UserCog,
 } from "lucide-react";
 import { FaCrown } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -55,7 +56,7 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
       link: "/profile",
     },
     {
-      icon: Settings,
+      icon: UserCog,
       title: "Admin",
       link: "/admin",
     },
