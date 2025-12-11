@@ -23,7 +23,7 @@ const LessonsWorth = () => {
     (a, b) => (b.saves || 0) - (a.saves || 0)
   );
   sortedLessons.forEach((lesson, index) => {
-    lesson.rank = index + 1;
+    lesson.rank = (index + 1).toString().padStart(2, "0");
   });
 
   return (
@@ -96,13 +96,13 @@ const LessonsWorth = () => {
                 {/* Author */}
                 <div className="flex items-center gap-3 shrink-0">
                   <img
-                    src={item.avatar || "https://i.pravatar.cc/60"}
-                    alt={item.displayName || "Author"}
+                    src={item.authorAvatar || "https://i.pravatar.cc/60"}
+                    alt={item.author || "Author"}
                     className="h-10 w-10 rounded-full"
                   />
                   <div className="text-sm">
                     <p className="font-medium text-slate-800">
-                      {item.displayName || "Unknown"}
+                      {item.author || "Unknown"}
                     </p>
                     <p className="text-xs text-slate-500">Author</p>
                   </div>

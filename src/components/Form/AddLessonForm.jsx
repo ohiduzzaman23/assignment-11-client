@@ -13,7 +13,6 @@ const AddLessonForm = () => {
   const contributor = useAuth();
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
-
   const {
     register,
     handleSubmit,
@@ -64,16 +63,14 @@ const AddLessonForm = () => {
       image: imageUrl,
       publicLesson: !!data.publicLesson,
       premiumOnly: !!data.premiumOnly,
-      author: contributor?.user?.displayName || "Anonymous",
+      author: contributor?.user?.displayName,
       authorAvatar: contributor?.user?.photoURL || "/images/default.jpg",
     };
 
     await mutateAsync(lessonData);
   };
-
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <ErrorPage />;
-
   return (
     <div className="min-h-screen w-full bg-[#F7F6F2] p-6 flex justify-center">
       <div className="w-full max-w-4xl rounded-2xl p-8 space-y-10">

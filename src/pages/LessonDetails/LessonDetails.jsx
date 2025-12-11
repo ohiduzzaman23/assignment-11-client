@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import LoadingSpinner from "../../components/Shared/LoadingSpinner";
 import { ArrowLeft, ThumbsUp, Bookmark, Share2, Flag } from "lucide-react";
 import PremiumCard from "./PremiumCard";
+import useAuth from "../../hooks/useAuth";
 
 const LessonDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const contributor = useAuth();
 
   // ---------- States ------
   const [newComment, setNewComment] = useState("");
@@ -59,8 +61,20 @@ const LessonDetails = () => {
       return res.data;
     },
   });
+  // Fetch Similar Lessons
+  const { data: similarLessons = [] } = useQuery({
+    queryKey: ["similar-lessons", lesson?.tags],
+    queryFn: async () => {
+      if (!lesson?.tags?.length) return [];
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/lessons`, {
+        params: { tags: lesson.tags.join(",") },
+      });
 
-  // Find author info
+      return res.data.filter((l) => l._id !== lesson._id);
+    },
+    enabled: !!lesson?.tags?.length,
+  });
+
   const lessonAuthor = contributors.find((c) => c.id === lesson?.authorId);
 
   // -------- Lesson Mutations -------
@@ -151,8 +165,8 @@ const LessonDetails = () => {
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
   if (!lesson) return <p>Lesson not found</p>;
-
   if (lesson.premiumOnly) return <PremiumCard />;
+
   // ------ Render -----
   return (
     <div className="min-h-screen bg-[#f6f1e7]">
@@ -210,7 +224,7 @@ const LessonDetails = () => {
             <div className="flex gap-4 mt-8">
               <button
                 onClick={() => lessonLikeMutation.mutate()}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition  ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
                   isLiked
                     ? "bg-red-500 text-white"
                     : "bg-gray-100 hover:bg-[#F08B42] hover:text-white"
@@ -221,7 +235,7 @@ const LessonDetails = () => {
 
               <button
                 onClick={() => lessonSaveMutation.mutate()}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition  ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
                   isSaved
                     ? "bg-[#F08B42] text-white"
                     : "bg-gray-100 hover:bg-[#F08B42] hover:text-white"
@@ -233,7 +247,7 @@ const LessonDetails = () => {
 
               <button
                 onClick={() => lessonShareMutation.mutate()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-[#F08B42] hover:text-white transition "
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-[#F08B42] hover:text-white transition"
               >
                 <Share2 size={18} /> Share
               </button>
@@ -370,36 +384,70 @@ const LessonDetails = () => {
 
         {/* Right Sidebar */}
         <div className="w-[280px] hidden lg:block">
+          {/* Written By */}
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-4">
             <p className="font-medium text-gray-500 mb-2">Written by</p>
             <div className="flex items-center gap-3 mb-4">
               <img
                 src={
+                  contributor?.user?.photoURL ||
                   lessonAuthor?.avatar ||
-                  lesson.authorImage ||
+                  lesson.authorAvatar ||
                   "https://i.pravatar.cc/60?img=7"
                 }
                 className="w-14 h-14 rounded-full"
               />
               <div>
                 <p className="font-semibold text-gray-700">
-                  {lessonAuthor?.name || lesson.author || "Unknown Author"}
+                  {contributor?.user?.displayName ||
+                    lessonAuthor?.name ||
+                    lesson.author ||
+                    "Unknown Author"}
                 </p>
                 <p className="text-sm text-gray-500">
                   {lesson.authorLessonCount || 0} lessons shared
                 </p>
               </div>
             </div>
-            <button className="w-full bg-gray-100 p-2 rounded-lg text-gray-700 hover:bg-gray-200 transition">
+            <Link
+              to="/profile"
+              className="w-full bg-gray-100 p-2 rounded-lg text-gray-700 hover:bg-gray-200 transition"
+            >
               View Profile
-            </button>
+            </Link>
           </div>
 
+          {/* Similar Lessons */}
           <div className="bg-white rounded-2xl shadow-lg p-5">
             <h3 className="font-semibold text-gray-800">Similar Lessons</h3>
-            <p className="text-gray-500 text-sm mt-2">
-              (You can add items here)
-            </p>
+            <div className="mt-3 flex flex-col gap-3 max-h-[300px] overflow-auto">
+              {similarLessons.length ? (
+                similarLessons.map((sl) => (
+                  <div
+                    key={sl._id}
+                    onClick={() => navigate(`/lessons/${sl._id}`)}
+                    className="cursor-pointer flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    <img
+                      src={sl.image || "/mountain.jpg"}
+                      className="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div className="flex-1">
+                      <p className="text-gray-700 font-medium text-sm">
+                        {sl.title}
+                      </p>
+                      <p className="text-gray-500 text-xs">
+                        {sl.tags?.join(", ")}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">
+                  No similar lessons found.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

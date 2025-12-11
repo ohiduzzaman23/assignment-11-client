@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import Container from "../Container";
 import logo from "/logo-2.png";
 import {
@@ -28,7 +29,7 @@ const Footer = () => {
             <div className="">
               <nav className="flex gap-4 ">
                 <a
-                  href="#"
+                  href="https://www.facebook.com/sobus.jaman.56"
                   className="p-2 bg-gray-800 rounded-full hover:bg-orange-500 transition"
                 >
                   <FaFacebookF className="text-white" />
@@ -37,7 +38,7 @@ const Footer = () => {
                   href="#"
                   className="p-2 bg-gray-800 rounded-full hover:bg-orange-500 transition"
                 >
-                  <FaTwitter className="text-white" />
+                  <X className="text-white" size={14} />
                 </a>
                 <a
                   href="#"
@@ -46,7 +47,7 @@ const Footer = () => {
                   <FaInstagram className="text-white" />
                 </a>
                 <a
-                  href="#"
+                  href="https://www.linkedin.com/in/ohiduz-zaman"
                   className="p-2 bg-gray-800 rounded-full hover:bg-orange-500 transition"
                 >
                   <FaLinkedinIn className="text-white" />
