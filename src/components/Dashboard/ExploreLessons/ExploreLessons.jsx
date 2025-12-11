@@ -11,6 +11,8 @@ const ExploreLessons = () => {
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [toneFilter, setToneFilter] = useState("All Tones");
   const [sortOption, setSortOption] = useState("Newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const lessonsPerPage = 8;
 
   const { data: lessons = [], isLoading } = useQuery({
     queryKey: ["lessons"],
@@ -65,7 +67,15 @@ const ExploreLessons = () => {
     return temp;
   }, [lessons, searchTerm, categoryFilter, toneFilter, sortOption]);
 
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredLessons.length / lessonsPerPage);
+  const currentLessons = filteredLessons.slice(
+    (currentPage - 1) * lessonsPerPage,
+    currentPage * lessonsPerPage
+  );
+
   if (isLoading) return <LoadingSpinner />;
+
   return (
     <div className="min-h-screen w-full bg-[#f7f5ef]">
       {/* Header */}
@@ -144,9 +154,9 @@ const ExploreLessons = () => {
         </div>
 
         {/* Lessons Grid */}
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 pb-16">
-          {filteredLessons.length ? (
-            filteredLessons.map((lesson) => (
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 pb-4">
+          {currentLessons.length ? (
+            currentLessons.map((lesson) => (
               <LessonCard key={lesson._id} lesson={lesson} />
             ))
           ) : (
@@ -155,6 +165,37 @@ const ExploreLessons = () => {
             </p>
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-6">
+            <button
+              className="px-3 py-1 border border-amber-500 rounded disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                className={`px-3 py-1 border border-amber-600 rounded ${
+                  currentPage === i + 1 ? "bg-[#F97516] text-white" : ""
+                }`}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              className="px-3 py-1 border border-amber-500 rounded disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </Container>
     </div>
   );
