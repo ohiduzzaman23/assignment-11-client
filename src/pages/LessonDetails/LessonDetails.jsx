@@ -165,7 +165,7 @@ const LessonDetails = () => {
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
   if (!lesson) return <p>Lesson not found</p>;
-  if (lesson.premiumOnly) return <PremiumCard />;
+  if (lesson.premiumOnly) return <PremiumCard id={lesson._id} />;
 
   // ------ Render -----
   return (

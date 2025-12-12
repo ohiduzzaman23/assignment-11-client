@@ -23,6 +23,7 @@ import ManageUsers from "../components/Dashboard/AdminDashboard/ManageUsers";
 import ManageLessons from "../components/Dashboard/AdminDashboard/ManageLessons";
 import ReportedLessons from "../components/Dashboard/AdminDashboard/ReportedLessons";
 import AdminProfile from "../components/Dashboard/AdminDashboard/AdminProfile";
+import Payment from "../components/Dashboard/Payment/Payment";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -34,9 +35,11 @@ export const router = createBrowserRouter([
       { path: "explore-lessons", element: <ExploreLessons /> },
       { path: "lessons/:id", element: <LessonDetails /> },
       { path: "pricing", element: <Pricing /> },
+      { path: "pricing/:lessonId", element: <Pricing /> },
       { path: "my-lessons", element: <MyLessons /> },
       { path: "edit-lesson/:id", element: <EditLesson /> },
       { path: "profile", element: <Profile /> },
+      { path: "payment/:lessonId", element: <Payment /> },
 
       // User Dashboard
       {

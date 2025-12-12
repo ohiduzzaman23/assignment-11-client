@@ -45,55 +45,72 @@ const EditLesson = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-center py-20 text-lg">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-[#f7f4ee] text-gray-800">
+    <div className="min-h-screen bg-[#f7f4ee] text-gray-800 py-16">
       <Container>
-        <div className="px-6 py-12 max-w-2xl mx-auto">
-          <h1 className="text-3xl font-semibold mb-6">Edit Lesson</h1>
+        <div className="bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl max-w-2xl mx-auto p-10 border border-gray-200">
+          <h1 className="text-4xl font-bold mb-8 text-center">Edit Lesson</h1>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Title */}
             <div>
-              <label className="block mb-1 font-medium">Title</label>
+              <label className="block mb-2 font-medium text-gray-700">
+                Lesson Title
+              </label>
               <input
                 type="text"
                 name="title"
                 value={lesson.title}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md p-2"
+                className="w-full border border-gray-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-lg p-3 transition"
                 required
               />
             </div>
 
+            {/* Content */}
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-2 font-medium text-gray-700">
                 Content / Description
               </label>
               <textarea
                 name="content"
                 value={lesson.content}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md p-2"
+                className="w-full border border-gray-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-lg p-3 transition"
                 rows={6}
                 required
               />
             </div>
 
+            {/* Image URL */}
             <div>
-              <label className="block mb-1 font-medium">Image URL</label>
+              <label className="block mb-2 font-medium text-gray-700">
+                Cover Image URL
+              </label>
               <input
                 type="text"
                 name="image"
                 value={lesson.image}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md p-2"
+                className="w-full border border-gray-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-lg p-3 transition"
               />
+
+              {lesson.image && (
+                <img
+                  src={lesson.image}
+                  alt="Preview"
+                  className="mt-4 w-full h-52 object-cover rounded-xl shadow-md"
+                />
+              )}
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
-              className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition"
+              className="w-full py-3 text-lg font-semibold text-white rounded-xl transition 
+              bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg"
             >
               Update Lesson
             </button>

@@ -3,7 +3,7 @@ import { Lock } from "lucide-react";
 import { FaCrown } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-const PremiumCard = () => {
+const PremiumCard = ({ id }) => {
   return (
     <div>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-10">
@@ -15,7 +15,7 @@ const PremiumCard = () => {
             unlock all premium content.
           </p>
           <Link
-            to="/pricing"
+            to={`/pricing/${id}`}
             className="px-6 py-3 bg-yellow-500 text-white rounded-2xl font-medium hover:bg-yellow-600 transition"
           >
             <FaCrown className="inline" /> Upgrade to Premium

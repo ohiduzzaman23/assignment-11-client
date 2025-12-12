@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import { Check, X } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import PurchaseModal from "../../Modal/PurchaseModal";
+import toast from "react-hot-toast";
 
 const Pricing = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { lessonId } = useParams();
 
-  const premiumPlan = {
-    _id: "premium001",
-    name: "Premium Lifetime Access",
-    category: "Subscription",
-    price: 1500,
-    description: "Lifetime access to all premium lessons.",
-    image: "/images/premium.jpg",
-    seller: "LifeMatters",
+  const handleUpgrade = () => {
+    if (!lessonId) {
+      toast.error("Please open a lesson first to upgrade!");
+      return;
+    }
+    setIsOpen(true);
   };
 
   return (
@@ -85,21 +85,15 @@ const Pricing = () => {
             ))}
           </ul>
 
-          <button
-            onClick={() => setIsOpen(true)}
-            className="w-full py-3 bg-[#F49C35] text-white rounded-lg hover:bg-orange-500"
+          <Link
+            to={lessonId ? `/payment/${lessonId}` : "#"}
+            onClick={handleUpgrade}
+            className="block w-full text-center py-3 bg-[#F49C35] text-white rounded-lg hover:bg-orange-500"
           >
             Upgrade Now
-          </button>
+          </Link>
         </motion.div>
       </div>
-
-      {/* MODAL */}
-      <PurchaseModal
-        isOpen={isOpen}
-        closeModal={() => setIsOpen(false)}
-        product={premiumPlan}
-      />
     </div>
   );
 };

@@ -73,8 +73,8 @@ const AddLessonForm = () => {
   if (isError) return <ErrorPage />;
   return (
     <div className="min-h-screen w-full bg-[#F7F6F2] p-6 flex justify-center">
-      <div className="w-full max-w-4xl rounded-2xl p-8 space-y-10">
-        <h1 className="text-3xl font-bold text-gray-800">
+      <div className="w-full max-w-4xl rounded-2xl p-8 space-y-8">
+        <h1 className="text-4xl font-bold text-gray-800">
           Create a Life Lesson
         </h1>
         <p className="text-gray-500 mt-1">
