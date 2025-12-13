@@ -4,18 +4,23 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import LoadingSpinner from "../../Shared/LoadingSpinner";
-import { useNavigate } from "react-router-dom";
 
-const ManageLessons = () => {
+const ReportedLessons = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   // Fetch all lessons
-  const { isLoading, data: lessons = [] } = useQuery({
-    queryKey: ["lessons"],
+  const {
+    data: reportedLessons = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["reported-lessons"],
     queryFn: async () => {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/lessons`);
-      return res.data;
+      // Filter lessons that have reports
+      return res.data.filter(
+        (lesson) => lesson.reports && lesson.reports.length > 0
+      );
     },
   });
 
@@ -25,7 +30,7 @@ const ManageLessons = () => {
       await axios.delete(`${import.meta.env.VITE_API_URL}/lessons/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["lessons"]);
+      queryClient.invalidateQueries(["reported-lessons"]);
       toast.success("Lesson deleted successfully");
     },
     onError: () => {
@@ -50,53 +55,49 @@ const ManageLessons = () => {
   };
 
   if (isLoading) return <LoadingSpinner />;
+  if (isError)
+    return <p className="text-red-500">Failed to load reported lessons.</p>;
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Manage Lessons</h1>
+    <div className="min-h-screen p-6">
+      <h1 className="text-3xl font-bold mb-6">Reported Lessons</h1>
 
-      {lessons.length ? (
+      {reportedLessons.length ? (
         <table className="w-full bg-white shadow rounded-xl">
           <thead>
             <tr className="bg-gray-200 text-left">
               <th className="p-3">Title</th>
-              <th className="p-3">Author</th>
-              <th className="p-3">Status</th>
+              <th className="p-3">Reported By</th>
+              <th className="p-3">Reason</th>
               <th className="p-3">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {lessons.map((lesson) => (
-              <tr key={lesson._id} className="border-b">
-                <td className="p-3">{lesson.title}</td>
-                <td className="p-3">{lesson.author || "Unknown"}</td>
-                <td className="p-3">
-                  {lesson.publicLesson ? "Public" : "Private"}
-                </td>
-                <td className="p-3 flex gap-3">
-                  <button
-                    className="px-3 py-1 bg-yellow-500 text-white rounded-xl"
-                    onClick={() => navigate(`/edit-lesson/${lesson._id}`)}
-                  >
-                    Edit
-                  </button>
+            {reportedLessons.map((lesson) =>
+              lesson.reports.map((r, index) => (
+                <tr key={lesson._id + "-" + index} className="border-b">
+                  <td className="p-3">{lesson.title}</td>
 
-                  <button
-                    className="px-3 py-1 bg-red-500 text-white rounded-xl"
-                    onClick={() => handleDelete(lesson._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+                  <td className="p-3">{lesson.author || "Unknown"}</td>
+                  <td className="p-3">{r.reason || "No reason"}</td>
+                  <td className="p-3">
+                    <button
+                      className="px-3 py-1 bg-red-500 text-white rounded-xl"
+                      onClick={() => handleDelete(lesson._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       ) : (
-        <p className="text-center text-gray-500">No lessons found.</p>
+        <p className="text-gray-500 text-center">No reported lessons found.</p>
       )}
     </div>
   );
 };
 
-export default ManageLessons;
+export default ReportedLessons;

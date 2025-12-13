@@ -75,6 +75,7 @@ export const router = createBrowserRouter([
           { path: "manage-users", element: <ManageUsers /> },
           { path: "manage-lessons", element: <ManageLessons /> },
           { path: "reported-lessons", element: <ReportedLessons /> },
+          { path: "report-lessons", element: <ReportedLesson /> },
           { path: "profile", element: <AdminProfile /> },
         ],
       },

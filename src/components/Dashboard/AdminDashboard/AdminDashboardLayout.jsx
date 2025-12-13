@@ -35,7 +35,7 @@ const AdminDashboardLayout = () => {
             <FileText /> Manage Lessons
           </NavLink>
           <NavLink
-            to="reported-lessons"
+            to="report-lessons"
             className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-200"
           >
             <Flag /> Reported Lessons
