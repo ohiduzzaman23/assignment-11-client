@@ -1,10 +1,14 @@
 import React from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { BarChart3, Users, FileText, Flag, UserCog } from "lucide-react";
 import Lottie from "lottie-react";
 import dashboardAnimation from "../../../assets/lottie/Businessmen at the table.json";
 
 const AdminDashboardLayout = () => {
+  const location = useLocation();
+
+  const showLottie = location.pathname.endsWith("/overview");
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -46,14 +50,17 @@ const AdminDashboardLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8 flex flex-col items-center justify-center">
-        {/* Lottie Animation */}
+      <main className="flex-1 p-8 flex flex-col items-center">
+        {/* Outlet */}
         <div className="w-full">
           <Outlet />
         </div>
-        <div className="w-full max-w-lg mb-8">
-          <Lottie animationData={dashboardAnimation} loop={true} />
-        </div>
+
+        {showLottie && (
+          <div className="w-full max-w-lg mt-8">
+            <Lottie animationData={dashboardAnimation} loop={true} />
+          </div>
+        )}
       </main>
     </div>
   );

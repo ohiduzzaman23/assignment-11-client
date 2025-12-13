@@ -69,7 +69,7 @@ const MyLessons = () => {
                     </div>
                   </div>
 
-                  {/* 3-dot menu */}
+                  {/* 3-dot */}
                   <div className="relative">
                     <button
                       className="p-2 hover:bg-gray-100 rounded-full"

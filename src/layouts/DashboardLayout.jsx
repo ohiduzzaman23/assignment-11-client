@@ -48,7 +48,7 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
       icon: Bookmark,
       title: "Favorites",
       desc: "View your saved lessons",
-      link: "/favorites",
+      link: "/favorites-lessons",
     },
     {
       icon: Settings,
@@ -104,8 +104,6 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
             <div className="mt-1">
               <Link to="/pricing" className="px-4 py-2 my-g-btn">
                 <FaCrown className="text-white text-lg inline mr-2" />
-                
-                
               </Link>
             </div>
           </div>

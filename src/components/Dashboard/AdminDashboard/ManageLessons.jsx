@@ -6,16 +6,16 @@ import Swal from "sweetalert2";
 import LoadingSpinner from "../../Shared/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
 
-const ManageLessons = () => {
+const MySavedLessons = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   // Fetch all lessons
-  const { data: lessons = [], isLoading } = useQuery({
+  const { isLoading, data: lessons = [] } = useQuery({
     queryKey: ["lessons"],
     queryFn: async () => {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/lessons`);
-      return res.data;
+      return res.data; // সব lessons
     },
   });
 
@@ -53,7 +53,7 @@ const ManageLessons = () => {
 
   return (
     <div className="min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Manage Lessons</h1>
+      <h1 className="text-3xl font-bold mb-6">My Saved Lessons</h1>
 
       {lessons.length ? (
         <table className="w-full bg-white shadow rounded-xl">
@@ -69,10 +69,10 @@ const ManageLessons = () => {
             {lessons.map((lesson) => (
               <tr key={lesson._id} className="border-b">
                 <td className="p-3">{lesson.title}</td>
+                <td className="p-3">{lesson.author || "Unknown"}</td>
                 <td className="p-3">
-                  {lesson.author?.name || lesson.author || "Unknown"}
+                  {lesson.publicLesson ? "Public" : "Private"}
                 </td>
-                <td className="p-3">{lesson.status || "Public"}</td>
                 <td className="p-3 flex gap-3">
                   <button
                     className="px-3 py-1 bg-yellow-500 text-white rounded-xl"
@@ -99,4 +99,4 @@ const ManageLessons = () => {
   );
 };
 
-export default ManageLessons;
+export default MySavedLessons;

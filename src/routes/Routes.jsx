@@ -26,6 +26,7 @@ import AdminProfile from "../components/Dashboard/AdminDashboard/AdminProfile";
 import Payment from "../components/Dashboard/Payment/Payment";
 import PaymentSuccess from "../components/Dashboard/Payment/PaymentSuccess";
 import PaymentCancelled from "../components/Dashboard/Payment/PaymentCancelled";
+import Favorites from "../layouts/Favorites";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
       { path: "payment/:lessonId", element: <Payment /> },
       { path: "payment-success", element: <PaymentSuccess /> },
       { path: "payment-cancelled/:lessonId", element: <PaymentCancelled /> },
+      { path: "favorites-lessons", element: <Favorites /> },
 
       // User Dashboard
       {

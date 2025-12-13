@@ -10,9 +10,10 @@ import useAuth from "../../hooks/useAuth";
 import { imageUpload } from "../../utils";
 
 const AddLessonForm = () => {
-  const contributor = useAuth();
+  const { user } = useAuth();
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
@@ -21,22 +22,20 @@ const AddLessonForm = () => {
     reset,
   } = useForm({ mode: "onChange" });
 
-  const {
-    mutateAsync,
-    isLoading,
-    isError,
-    reset: mutationReset,
-  } = useMutation({
+  const { mutateAsync, isLoading, isError } = useMutation({
     mutationFn: async (payload) =>
-      await axios.post(`${import.meta.env.VITE_API_URL}/lessons`, payload),
+      axios.post(`${import.meta.env.VITE_API_URL}/lessons`, payload, {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }),
     onSuccess: () => {
       toast.success("Lesson Added Successfully");
       queryClient.invalidateQueries(["lessons"]);
       reset();
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    onError: (err) => {
-      console.error(err);
+    onError: () => {
       toast.error("Failed to add lesson");
     },
   });
@@ -48,6 +47,7 @@ const AddLessonForm = () => {
 
   const onSubmit = async (data) => {
     let imageUrl = "";
+
     if (data.coverImage && typeof data.coverImage !== "string") {
       imageUrl = await imageUpload(data.coverImage);
     } else if (typeof data.coverImage === "string") {
@@ -63,8 +63,10 @@ const AddLessonForm = () => {
       image: imageUrl,
       publicLesson: !!data.publicLesson,
       premiumOnly: !!data.premiumOnly,
-      author: contributor?.user?.displayName,
-      authorAvatar: contributor?.user?.photoURL || "/images/default.jpg",
+
+      author: user?.displayName || "Anonymous",
+      authorEmail: user?.email,
+      authorAvatar: user?.photoURL || "/images/default.jpg",
     };
 
     await mutateAsync(lessonData);
