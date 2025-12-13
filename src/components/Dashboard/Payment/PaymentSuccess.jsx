@@ -11,8 +11,6 @@ const PaymentSuccess = () => {
   const sessionId = searchParams.get("session_id");
   const axiosSecure = useAxiosSecure();
 
-  console.log(sessionId);
-
   useEffect(() => {
     if (sessionId) {
       axiosSecure
@@ -21,27 +19,49 @@ const PaymentSuccess = () => {
           console.log(res.data);
           setPaymentInfo({
             transactionId: res.data.transactionId,
-            trackingId: res.data.trackingId,
+            lessonId: res.data.lessonId,
           });
-        });
+
+          if (res.data.lessonId) {
+            localStorage.setItem(`lesson-${res.data.lessonId}-unlocked`, true);
+          }
+        })
+        .catch((err) => console.error("Payment success error:", err));
     }
   }, [sessionId, axiosSecure]);
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#f6f1e7] flex flex-col">
       <Container>
-        <div className="flex">
-          <div className="mt-10">
-            <h2 className="text-4xl">Payment successful</h2>
-            <p>Your TransactionId: {paymentInfo.transactionId}</p>
-            <p>Your Parcel Tracking id: {paymentInfo.trackingId}</p>
+        <div className="flex flex-col lg:flex-row items-center gap-10 mt-10">
+          {/* Left: Payment Info */}
+          <div className="flex-1">
+            <h2 className="text-4xl font-semibold mb-4">Payment Successful!</h2>
+            <p className="text-lg mb-2">
+              Transaction ID:{" "}
+              <span className="font-mono text-orange-500">
+                {paymentInfo.transactionId || "Loading..."}
+              </span>
+            </p>
+            <p className="text-lg">
+              🏷 Parcel Tracking ID:{" "}
+              <span className="font-mono text-orange-500">
+                {paymentInfo.lessonId
+                  ? `TRK-${paymentInfo.lessonId}`
+                  : "Generating..."}
+              </span>
+            </p>
+            <p className="mt-4 text-gray-600">
+              You now have access to your premium lesson. Enjoy learning!
+            </p>
           </div>
-          <div>
-            {" "}
+
+          {/* Right: Lottie Animation */}
+          <div className="w-full max-w-md">
             <Lottie
-              className="h-screen 0"
               animationData={SuccessCelebration}
               loop={true}
+              className="w-full h-80"
             />
           </div>
         </div>

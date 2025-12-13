@@ -54,7 +54,7 @@ const LessonCard = ({ lesson }) => {
         <div className="p-4 flex flex-col justify-between h-[132px]">
           <div>
             <p className="text-xs text-gray-500 mb-1">
-              {lesson.tag || "General"}
+              {lesson.category || "General"}
             </p>
 
             <h3
@@ -70,21 +70,21 @@ const LessonCard = ({ lesson }) => {
           </div>
 
           <div className="flex items-center justify-between text-gray-500 text-sm">
-            <span>👤 {lesson.author || "Anonymous"}</span>
+            {/* Author */}
+            <span>
+              👤 {lesson.author?.name || lesson.author || "Anonymous"}
+            </span>
 
             <div className="flex items-center gap-3">
-              {/* Likes */}
               <span className="flex items-center gap-1">
                 <Heart size={14} /> {lesson.likes || 0}
               </span>
 
-              {/* Comments count */}
               <span className="flex items-center gap-1">
                 <MessageCircle size={14} />{" "}
                 {Array.isArray(lesson.comments) ? lesson.comments.length : 0}
               </span>
 
-              {/* Views */}
               <span className="flex items-center gap-1">
                 <Eye size={14} /> {lesson.views || 0}
               </span>

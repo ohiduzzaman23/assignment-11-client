@@ -104,7 +104,8 @@ const DashboardLayout = ({ userName = "Demo User" }) => {
             <div className="mt-1">
               <Link to="/pricing" className="px-4 py-2 my-g-btn">
                 <FaCrown className="text-white text-lg inline mr-2" />
-                Upgrade to Premium
+                
+                
               </Link>
             </div>
           </div>
