@@ -15,7 +15,6 @@ const Pricing = () => {
     }
     setIsOpen(true);
   };
-
   return (
     <div className="min-h-screen bg-[#f7f5ef] text-gray-800">
       <div className="bg-gradient-to-b from-[#4a3622] to-[#6b5136] text-white py-20 text-center px-4">

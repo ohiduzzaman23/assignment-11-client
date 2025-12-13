@@ -24,6 +24,8 @@ import ManageLessons from "../components/Dashboard/AdminDashboard/ManageLessons"
 import ReportedLessons from "../components/Dashboard/AdminDashboard/ReportedLessons";
 import AdminProfile from "../components/Dashboard/AdminDashboard/AdminProfile";
 import Payment from "../components/Dashboard/Payment/Payment";
+import PaymentSuccess from "../components/Dashboard/Payment/PaymentSuccess";
+import PaymentCancelled from "../components/Dashboard/Payment/PaymentCancelled";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -40,6 +42,8 @@ export const router = createBrowserRouter([
       { path: "edit-lesson/:id", element: <EditLesson /> },
       { path: "profile", element: <Profile /> },
       { path: "payment/:lessonId", element: <Payment /> },
+      { path: "payment-success", element: <PaymentSuccess /> },
+      { path: "payment-cancelled/:lessonId", element: <PaymentCancelled /> },
 
       // User Dashboard
       {
