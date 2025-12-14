@@ -67,8 +67,8 @@ const AddLessonForm = () => {
       author: user?.displayName || "Anonymous",
       authorEmail: user?.email,
       authorAvatar: user?.photoURL || "/images/default.jpg",
+      authorRole: user?.role || "user",
     };
-
     await mutateAsync(lessonData);
   };
   if (isLoading) return <LoadingSpinner />;

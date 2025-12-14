@@ -1,96 +1,57 @@
-import React from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import toast from "react-hot-toast";
-import LoadingSpinner from "../../Shared/LoadingSpinner";
+import { useQuery } from "@tanstack/react-query";
+import useAuth from "../../../hooks/useAuth";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import LoadingSpinner from "../../../components/Shared/LoadingSpinner";
+import UserDataRow from "../TableRows/UserDataRow";
 
 const ManageUsers = () => {
-  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
 
-  // Fetch all users
-  const { data: users = [], isLoading } = useQuery({
-    queryKey: ["users"],
+  const {
+    data: users = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["users", user?.email],
     queryFn: async () => {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/users`);
-      return res.data;
-    },
-  });
-
-  // Make Admin Mutation
-  const makeAdminMutation = useMutation({
-    mutationFn: async (userId) => {
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/users/${userId}/make-admin`
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["users"]);
-      toast.success("User promoted to admin!");
-    },
-    onError: () => {
-      toast.error("Failed to make admin");
-    },
-  });
-
-  // Delete User Mutation
-  const deleteUserMutation = useMutation({
-    mutationFn: async (userId) => {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/users/${userId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["users"]);
-      toast.success("User deleted successfully");
-    },
-    onError: () => {
-      toast.error("Failed to delete user");
+      const result = await axiosSecure(`/users`);
+      return result.data;
     },
   });
 
   if (isLoading) return <LoadingSpinner />;
 
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Manage Users</h1>
+  const userList = users.filter((u) => u.authorRole !== "admin");
 
-      {users.length ? (
-        <table className="w-full bg-white shadow rounded-xl">
-          <thead>
-            <tr className="bg-gray-200 text-left">
-              <th className="p-3">Name</th>
-              <th className="p-3">Email</th>
-              <th className="p-3">Role</th>
-              <th className="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user._id} className="border-b">
-                <td className="p-3">{user.name || "Unknown"}</td>
-                <td className="p-3">{user.email}</td>
-                <td className="p-3">{user.role || "User"}</td>
-                <td className="p-3 flex gap-3">
-                  {user.role !== "admin" && (
-                    <button
-                      className="px-3 py-1 bg-blue-500 text-white rounded-xl"
-                      onClick={() => makeAdminMutation.mutate(user._id)}
-                    >
-                      Make Admin
-                    </button>
-                  )}
-                  <button
-                    className="px-3 py-1 bg-red-500 text-white rounded-xl"
-                    onClick={() => deleteUserMutation.mutate(user._id)}
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p className="text-center text-gray-500">No users found.</p>
-      )}
+  return (
+    <div className="container mx-auto px-4 sm:px-8">
+      <div className="py-3">
+        <div className="-mx-4 sm:-mx-3 px-4 sm:px-8 py-4 overflow-x-auto">
+          <div className="inline-block min-w-full shadow rounded-lg overflow-hidden">
+            <table className="min-w-full leading-normal">
+              <thead>
+                <tr>
+                  <th className="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
+                    Email
+                  </th>
+                  <th className="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
+                    Role
+                  </th>
+                  <th className="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {userList.map((user) => (
+                  <UserDataRow refetch={refetch} key={user._id} user={user} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

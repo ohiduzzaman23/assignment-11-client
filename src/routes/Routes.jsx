@@ -21,12 +21,12 @@ import AdminDashboardLayout from "../components/Dashboard/AdminDashboard/AdminDa
 import AdminOverview from "../components/Dashboard/AdminDashboard/AdminOverview";
 import ManageUsers from "../components/Dashboard/AdminDashboard/ManageUsers";
 import ManageLessons from "../components/Dashboard/AdminDashboard/ManageLessons";
-import ReportedLessons from "../components/Dashboard/AdminDashboard/ReportedLessons";
 import AdminProfile from "../components/Dashboard/AdminDashboard/AdminProfile";
 import Payment from "../components/Dashboard/Payment/Payment";
 import PaymentSuccess from "../components/Dashboard/Payment/PaymentSuccess";
 import PaymentCancelled from "../components/Dashboard/Payment/PaymentCancelled";
 import Favorites from "../layouts/Favorites";
+import ReportedLessons from "../components/Dashboard/AdminDashboard/ReportedLesson";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -74,8 +74,7 @@ export const router = createBrowserRouter([
           { path: "overview", element: <AdminOverview /> },
           { path: "manage-users", element: <ManageUsers /> },
           { path: "manage-lessons", element: <ManageLessons /> },
-          { path: "reported-lessons", element: <ReportedLessons /> },
-          { path: "report-lessons", element: <ReportedLesson /> },
+          { path: "report-lessons", element: <ReportedLessons /> },
           { path: "profile", element: <AdminProfile /> },
         ],
       },
