@@ -1,133 +1,116 @@
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
+import { Eye, Heart, Bookmark, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import toast from "react-hot-toast";
-import LoadingSpinner from "../components/Shared/LoadingSpinner";
+import Container from "../components/Shared/Container";
+import useAuth from "../hooks/useAuth";
 
-const ManageUsers = () => {
-  const queryClient = useQueryClient();
-  const [users, setUsers] = useState([]);
+const MyLessons = () => {
+  const [lessons, setLessons] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // Fetch all lessons and map users
-  const { isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/lessons`);
-      const lessons = res.data;
+  useEffect(() => {
+    if (!user?.email) return;
 
-      const userMap = {};
-      lessons.forEach((lesson) => {
-        const name = lesson.author || "Anonymous";
-        const email = lesson.authorEmail || name;
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/lessons`, {
+        params: { userEmail: user.email },
+      })
+      .then((res) => setLessons(res.data))
+      .catch((err) => console.error("Failed to fetch lessons:", err));
+  }, [user]);
 
-        if (userMap[email]) {
-          userMap[email].lessons++;
-        } else {
-          userMap[email] = {
-            name,
-            email,
-            lessons: 1,
-            role: "User", // default role
-            _id: email, // use email as unique key
-          };
-        }
-      });
-
-      const mappedUsers = Object.values(userMap);
-      setUsers(mappedUsers); // set local state
-      return mappedUsers;
-    },
-  });
-
-  // Make Admin Mutation
-  const makeAdminMutation = useMutation({
-    mutationFn: async (userEmail) => {
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/users/${userEmail}/make-admin`
-      );
-    },
-    onSuccess: (_, userEmail) => {
-      setUsers((prev) =>
-        prev.map((u) => (u.email === userEmail ? { ...u, role: "admin" } : u))
-      );
-      toast.success("User promoted to admin!");
-    },
-    onError: () => {
-      toast.error("Failed to make admin");
-    },
-  });
-
-  // Delete User Mutation
-  const deleteUserMutation = useMutation({
-    mutationFn: async (userEmail) => {
-      await axios.delete(
-        `${import.meta.env.VITE_API_URL}/lessons/by-author/${userEmail}`
-      );
-    },
-    onSuccess: (_, userEmail) => {
-      setUsers((prev) => prev.filter((u) => u.email !== userEmail));
-      toast.success("All lessons by user deleted successfully");
-    },
-    onError: (error) => {
-      console.error(error);
-      toast.error("Failed to delete user lessons");
-    },
-  });
-
-  if (isLoading) return <LoadingSpinner />;
+  const handleDelete = async (id) => {
+    if (!confirm("Are you sure you want to delete this lesson?")) return;
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/lessons/${id}`);
+      setLessons((prev) => prev.filter((l) => l._id !== id));
+    } catch (err) {
+      console.error("Failed to delete lesson:", err);
+    }
+  };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Manage Users</h1>
+    <div className="min-h-screen bg-[#f7f4ee] text-gray-800">
+      <Container>
+        <div className="px-6 py-12">
+          <h1 className="text-3xl font-semibold mb-2">My Lessons</h1>
+          <p className="text-gray-600 mb-6">
+            Manage and track your shared life lessons
+          </p>
 
-      {users.length ? (
-        <table className="w-full bg-white shadow rounded-xl">
-          <thead>
-            <tr className="bg-gray-200 text-left">
-              <th className="p-3">Name</th>
-              <th className="p-3">Email</th>
-              <th className="p-3">Lessons Created</th>
-              <th className="p-3">Role</th>
-              <th className="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user._id} className="border-b">
-                <td className="p-3">{user.name}</td>
-                <td className="p-3">{user.email}</td>
-                <td className="p-3">{user.lessons}</td>
-                <td className="p-3">{user.role}</td>
-                <td className="p-3 flex gap-3">
-                  {user.role !== "admin" && (
+          {lessons.length === 0 ? (
+            <p className="text-gray-500">
+              You haven't created any lessons yet.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {lessons.map((l) => (
+                <div
+                  key={l._id}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-4 items-center relative"
+                >
+                  <img
+                    src={l.image || "/mountain.jpg"}
+                    alt={l.title}
+                    className="w-36 h-20 object-cover rounded-md flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-800">{l.title}</h4>
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                      {l.content || l.desc || "No description"}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-3">
+                      <div className="flex items-center gap-1">
+                        <Eye size={14} /> {l.views || 0}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Heart size={14} /> {l.likes || 0}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Bookmark size={14} /> {l.comments?.length || 0}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3-dot*/}
+                  <div className="relative">
                     <button
-                      className="px-3 py-1 bg-blue-500 text-white rounded-xl"
-                      onClick={() => makeAdminMutation.mutate(user.email)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                      onClick={() =>
+                        setMenuOpen(menuOpen === l._id ? null : l._id)
+                      }
                     >
-                      Make Admin
+                      <MoreHorizontal size={18} />
                     </button>
-                  )}
-                  <button
-                    className="px-3 py-1 bg-red-500 text-white rounded-xl"
-                    onClick={() => {
-                      const confirmDelete = window.confirm(
-                        `Are you sure you want to delete ${user.name}?`
-                      );
-                      if (confirmDelete) deleteUserMutation.mutate(user.email);
-                    }}
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p className="text-center text-gray-500">No users found.</p>
-      )}
+
+                    {menuOpen === l._id && (
+                      <div className="absolute right-0 top-8 bg-white shadow-lg border border-gray-200 rounded-md w-32 z-10">
+                        <button
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                          onClick={() => navigate(`/edit-lesson/${l._id}`)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
+                          onClick={() => handleDelete(l._id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Container>
     </div>
   );
 };
 
-export default ManageUsers;
+export default MyLessons;
