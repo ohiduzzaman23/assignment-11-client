@@ -87,7 +87,7 @@ const AdminDashboardLayout = () => {
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <Outlet />
 
-          {/* Lottie for overview */}
+          {/* Lottie  */}
           {showLottie && (
             <div className="w-full max-w-lg mt-8 mx-auto">
               <Lottie animationData={dashboardAnimation} loop={true} />
