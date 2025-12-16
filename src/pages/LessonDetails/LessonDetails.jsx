@@ -166,7 +166,7 @@ const LessonDetails = () => {
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
   if (!lesson) return <p>Lesson not found</p>;
   if (lesson.premiumOnly) return <PremiumCard id={lesson._id} />;
-
+  console.log(lesson);
   // ------ Render -----
   return (
     <div className="min-h-screen bg-[#f6f1e7]">

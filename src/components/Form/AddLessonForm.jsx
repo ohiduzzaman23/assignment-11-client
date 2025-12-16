@@ -8,11 +8,13 @@ import ErrorPage from "../../pages/ErrorPage";
 import { Upload, Globe, ShieldCheck } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import { imageUpload } from "../../utils";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const AddLessonForm = () => {
   const { user } = useAuth();
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
+  const axiosSecure = useAxiosSecure();
 
   const {
     register,
@@ -24,7 +26,7 @@ const AddLessonForm = () => {
 
   const { mutateAsync, isLoading, isError } = useMutation({
     mutationFn: async (payload) =>
-      axios.post(`${import.meta.env.VITE_API_URL}/lessons`, payload, {
+      axiosSecure(`${import.meta.env.VITE_API_URL}/lessons`, payload, {
         headers: {
           authorization: `Bearer ${localStorage.getItem("token")}`,
         },

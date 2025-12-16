@@ -1,42 +1,60 @@
-import { useState } from "react";
-import UpdateUserRoleModal from "../../Modal/UpdateUserRoleModal";
+import React from "react";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import toast from "react-hot-toast";
 
 const UserDataRow = ({ user, refetch }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const closeModal = () => setIsOpen(false);
+  const axiosSecure = useAxiosSecure();
+
+  const handleMakeAdmin = async () => {
+    try {
+      const res = await axiosSecure.patch(`/users/${user._id}/update-role`, {
+        role: "admin",
+      });
+      if (res.data.success) {
+        toast.success("User promoted to admin!");
+        refetch();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update role!");
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      const res = await axiosSecure.delete(`/users/${user._id}`);
+      toast.success("User deleted!");
+      refetch();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete user!");
+    }
+  };
 
   return (
     <tr>
-      {/* Email */}
-      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <p className="text-gray-900">{user?.authorEmail}</p>
+      <td className="px-5 py-3 border-b border-gray-200">
+        {user.name || user.displayName || "No Name"}
       </td>
-
-      {/* Role */}
-      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <p className="text-gray-900">{user?.authorRole}</p>
+      <td className="px-5 py-3 border-b border-gray-200">{user.email}</td>
+      <td className="px-5 py-3 border-b border-gray-200">
+        {user.role || "user"}
       </td>
-
-      {/* Action */}
-      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <span
-          onClick={() => setIsOpen(true)}
-          className="relative cursor-pointer inline-block px-3 py-1 font-semibold text-green-900 leading-tight"
+      <td className="px-5 py-3 border-b border-gray-200 flex gap-2">
+        {user.role !== "admin" && (
+          <button
+            onClick={handleMakeAdmin}
+            className="px-3 py-1 bg-blue-500 text-white rounded"
+          >
+            Make Admin
+          </button>
+        )}
+        <button
+          onClick={handleDeleteUser}
+          className="px-3 py-1 bg-red-500 text-white rounded"
         >
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 bg-green-200 opacity-50 rounded-full"
-          ></span>
-          <span className="relative">Update Role</span>
-        </span>
-
-        {/* Modal */}
-        <UpdateUserRoleModal
-          user={user}
-          refetch={refetch}
-          isOpen={isOpen}
-          closeModal={closeModal}
-        />
+          Delete
+        </button>
       </td>
     </tr>
   );

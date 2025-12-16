@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { Outlet, NavLink, useLocation, Navigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import dashboardAnimation from "../../../assets/lottie/Businessmen at the table.json";
 import {
@@ -11,13 +11,19 @@ import {
   Flag,
   UserCog,
 } from "lucide-react";
+import useAdmin from "../../../hooks/userAdmin";
+import LoadingSpinner from "../../Shared/LoadingSpinner";
 
 const AdminDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const [isAdmin, isAdminLoading] = useAdmin();
 
   const showLottie = location.pathname.endsWith("/overview");
-
+  if (isAdminLoading) return <LoadingSpinner />;
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}

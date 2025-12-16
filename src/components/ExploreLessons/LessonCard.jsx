@@ -16,7 +16,6 @@ const LessonCard = ({ lesson }) => {
   }, [lesson?.title]);
 
   if (!lesson?._id) return null;
-
   return (
     <Link to={`/lessons/${lesson._id}`} className="block h-full">
       <motion.div
