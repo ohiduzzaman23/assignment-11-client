@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Outlet, NavLink, useLocation, Navigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import dashboardAnimation from "../../../assets/lottie/Businessmen at the table.json";
+import dashboardAnimation2 from "../../../assets/lottie/Growth Chart.json";
 import {
   Menu,
   X,

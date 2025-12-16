@@ -25,12 +25,9 @@ const AddLessonForm = () => {
   } = useForm({ mode: "onChange" });
 
   const { mutateAsync, isLoading, isError } = useMutation({
-    mutationFn: async (payload) =>
-      axiosSecure(`${import.meta.env.VITE_API_URL}/lessons`, payload, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }),
+    mutationFn: async (payload) => {
+      return axiosSecure.post("/lessons", payload);
+    },
     onSuccess: () => {
       toast.success("Lesson Added Successfully");
       queryClient.invalidateQueries(["lessons"]);
@@ -69,7 +66,6 @@ const AddLessonForm = () => {
       author: user?.displayName || "Anonymous",
       authorEmail: user?.email,
       authorAvatar: user?.photoURL || "/images/default.jpg",
-      authorRole: user?.role || "user",
     };
     await mutateAsync(lessonData);
   };

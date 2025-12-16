@@ -13,18 +13,14 @@ const LessonDetails = () => {
   const queryClient = useQueryClient();
   const contributor = useAuth();
 
-  // ---------- States ------
+  // ----- States ------
   const [newComment, setNewComment] = useState("");
   const [replyText, setReplyText] = useState({});
   const [isSaved, setIsSaved] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
 
-  // token exists
-  const token = localStorage.getItem("token");
-  const authHeaders = token ? { authorization: `Bearer ${token}` } : {};
-
-  // ---------- Fetch Lesson -------
+  // ----- Fetch Lesson -----
   const {
     data: lesson,
     isLoading,
@@ -51,7 +47,7 @@ const LessonDetails = () => {
     },
   });
 
-  // ---------- Fetch Contributors -------
+  // ----- Fetch Contributors -----
   const { data: contributors = [] } = useQuery({
     queryKey: ["contributors"],
     queryFn: async () => {
@@ -79,12 +75,14 @@ const LessonDetails = () => {
 
   // -------- Lesson Mutations -------
   const lessonLikeMutation = useMutation({
-    mutationFn: async () =>
-      axios.post(
+    mutationFn: async () => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
         `${import.meta.env.VITE_API_URL}/lessons/${id}/like`,
         {},
-        { headers: authHeaders }
-      ),
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
     onMutate: () => {
       setIsLiked((prev) => !prev);
       setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
@@ -97,8 +95,14 @@ const LessonDetails = () => {
   });
 
   const lessonSaveMutation = useMutation({
-    mutationFn: async () =>
-      axios.post(`${import.meta.env.VITE_API_URL}/lessons/${id}/save`),
+    mutationFn: async () => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/save`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["lesson", id]);
       queryClient.invalidateQueries(["lessons-worth"]);
@@ -107,27 +111,44 @@ const LessonDetails = () => {
   });
 
   const lessonShareMutation = useMutation({
-    mutationFn: async () =>
-      axios.post(`${import.meta.env.VITE_API_URL}/lessons/${id}/share`),
+    mutationFn: async () => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/share`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
     onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
   });
 
   const lessonReportMutation = useMutation({
-    mutationFn: async (reason) =>
-      axios.post(`${import.meta.env.VITE_API_URL}/lessons/${id}/report`, {
-        reason,
-      }),
+    mutationFn: async (reason) => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/report`,
+        { reason },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
     onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
   });
 
   // ----- Comment Mutations -------
   const commentMutation = useMutation({
-    mutationFn: async (text) =>
-      axios.post(
+    mutationFn: async (text) => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
         `${import.meta.env.VITE_API_URL}/lessons/${id}/comments`,
-        { text },
-        { headers: authHeaders }
-      ),
+        {
+          text,
+          avatar: contributor?.user?.photoURL,
+          name: contributor?.user?.displayName,
+          userId: contributor?.user?.uid,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["lesson", id]);
       setNewComment("");
@@ -135,14 +156,16 @@ const LessonDetails = () => {
   });
 
   const replyMutation = useMutation({
-    mutationFn: async ({ commentId, text }) =>
-      axios.post(
+    mutationFn: async ({ commentId, text }) => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
         `${
           import.meta.env.VITE_API_URL
         }/lessons/${id}/comments/${commentId}/replies`,
         { text },
-        { headers: authHeaders }
-      ),
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["lesson", id]);
       setReplyText({});
@@ -150,24 +173,24 @@ const LessonDetails = () => {
   });
 
   const likeCommentMutation = useMutation({
-    mutationFn: async (commentId) =>
-      axios.post(
+    mutationFn: async (commentId) => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
         `${
           import.meta.env.VITE_API_URL
         }/lessons/${id}/comments/${commentId}/like`,
         {},
-        { headers: authHeaders }
-      ),
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
     onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
   });
 
-  // --- Loading / Error ------
+  // Loading
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
   if (!lesson) return <p>Lesson not found</p>;
   if (lesson.premiumOnly) return <PremiumCard id={lesson._id} />;
-  console.log(lesson);
-  // ------ Render -----
   return (
     <div className="min-h-screen bg-[#f6f1e7]">
       {/* Header */}
@@ -206,7 +229,6 @@ const LessonDetails = () => {
               {lesson.title}
             </h1>
 
-            {/* Meta */}
             <div className="flex items-center flex-wrap gap-4 text-gray-500 text-sm mb-6">
               <span>{new Date(lesson.createdAt).toDateString()}</span>
               <span>{lesson.views || 0} views</span>
@@ -270,37 +292,57 @@ const LessonDetails = () => {
               Comments
             </h2>
 
-            <textarea
-              className="w-full border border-gray-300 rounded-xl p-4 text-gray-700 focus:ring-2 focus:ring-orange-200 focus:outline-none"
-              rows="3"
-              placeholder="Share your thoughts..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-            />
-            <button
-              onClick={() => commentMutation.mutate(newComment)}
-              disabled={!newComment || commentMutation.isLoading}
-              className="mt-3 bg-orange-400 text-white px-5 py-2 rounded-lg hover:bg-orange-500 transition"
-            >
-              {commentMutation.isLoading ? "Posting..." : "Post Comment"}
-            </button>
+            {/* New Comment */}
+            <div className="flex gap-3 mb-4">
+              <img
+                src={
+                  contributor?.user?.photoURL ||
+                  "https://i.pravatar.cc/40?u=" + contributor?.user?.uid
+                }
+                className="w-10 h-10 rounded-full"
+              />
+              <div className="flex-1">
+                <textarea
+                  className="w-full border border-gray-300 rounded-xl p-4 text-gray-700 focus:ring-2 focus:ring-orange-200 focus:outline-none"
+                  rows="3"
+                  placeholder="Share your thoughts..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                />
+                <button
+                  onClick={() => commentMutation.mutate(newComment)}
+                  disabled={!newComment || commentMutation.isLoading}
+                  className="mt-2 bg-orange-400 text-white px-5 py-2 rounded-lg hover:bg-orange-500 transition"
+                >
+                  {commentMutation.isLoading ? "Posting..." : "Post Comment"}
+                </button>
+              </div>
+            </div>
 
+            {/* Existing Comments */}
             <div className="mt-6 space-y-6 max-h-[400px] overflow-auto">
               {lesson.comments?.length ? (
                 lesson.comments.map((c) => (
                   <div key={c._id} className="flex flex-col gap-2">
                     <div className="flex gap-3">
                       <img
-                        src={`https://i.pravatar.cc/40?u=${c.user}`}
+                        src={
+                          c.avatar ||
+                          "https://i.pravatar.cc/40?u=" + c.user ||
+                          "https://i.pravatar.cc/40?u=default"
+                        }
                         className="w-10 h-10 rounded-full"
                       />
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-800">{c.user}</p>
+                        <p className="font-semibold text-gray-800">
+                          {c.name || c.user || "Anonymous"}
+                        </p>
                         <p className="text-sm text-gray-500 mb-1">
                           {new Date(c.createdAt).toLocaleDateString()}
                         </p>
                         <p className="text-gray-700">{c.text}</p>
 
+                        {/* Comment Actions */}
                         <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                           <button
                             onClick={() => likeCommentMutation.mutate(c._id)}
@@ -320,6 +362,7 @@ const LessonDetails = () => {
                           </button>
                         </div>
 
+                        {/* Reply Box */}
                         {replyText[c._id] !== undefined && (
                           <div className="mt-2 flex flex-col gap-2">
                             <textarea
@@ -351,17 +394,21 @@ const LessonDetails = () => {
                           </div>
                         )}
 
+                        {/* Replies */}
                         {c.replies?.length > 0 && (
                           <div className="mt-2 pl-6 flex flex-col gap-2">
                             {c.replies.map((r) => (
                               <div key={r._id} className="flex gap-3">
                                 <img
-                                  src={`https://i.pravatar.cc/30?u=${r.user}`}
+                                  src={
+                                    r.avatar ||
+                                    "https://i.pravatar.cc/30?u=" + r.user
+                                  }
                                   className="w-7 h-7 rounded-full"
                                 />
                                 <div>
                                   <p className="font-semibold text-gray-700 text-sm">
-                                    {r.user}
+                                    {r.user || "Anonymous"}
                                   </p>
                                   <p className="text-gray-600 text-sm">
                                     {r.text}

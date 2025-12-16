@@ -54,20 +54,22 @@ const AdminProfile = () => {
 
         <div className="p-6 mt-15 bg-white shadow rounded-xl flex flex-col items-center">
           {/* Name */}
-          <h2 className="text-xl font-semibold mb-2">Name:</h2>
+          <h2 className="text-sm mb-2">Name:</h2>
           {isEditing ? (
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border p-2 rounded mb-2 text-center"
+              className="w-full font-semibold text-xl border p-2 rounded mb-2 text-center"
             />
           ) : (
-            <p className="text-gray-700">{user?.displayName || "Admin"}</p>
+            <p className="text-gray-700 font-semibold text-xl text-center">
+              {user?.displayName || "Admin"}
+            </p>
           )}
 
           {/* Photo */}
-          <h2 className="text-xl font-semibold mt-4 mb-2">Photo</h2>
+          <h2 className="text-sm font-semibold mt-4 mb-2">Photo</h2>
           <img
             src={
               photoFile
@@ -106,7 +108,7 @@ const AdminProfile = () => {
                 <button
                   onClick={handleUpdateProfile}
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 my-g-btn"
                 >
                   {loading ? "Updating..." : "Save"}
                 </button>
@@ -120,7 +122,7 @@ const AdminProfile = () => {
             ) : (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 my-g-btn"
               >
                 Update Profile
               </button>
