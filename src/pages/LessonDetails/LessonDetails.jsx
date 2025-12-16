@@ -154,7 +154,6 @@ const LessonDetails = () => {
       setNewComment("");
     },
   });
-
   const replyMutation = useMutation({
     mutationFn: async ({ commentId, text }) => {
       const token = await contributor?.user?.getIdToken();
@@ -191,7 +190,6 @@ const LessonDetails = () => {
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
   if (!lesson) return <p>Lesson not found</p>;
   if (lesson.premiumOnly) return <PremiumCard id={lesson._id} />;
-  console.log(lesson);
 
   return (
     <div className="min-h-screen bg-[#f6f1e7]">
@@ -391,6 +389,8 @@ const LessonDetails = () => {
                                 replyMutation.mutate({
                                   commentId: c._id,
                                   text: replyText[c._id],
+                                  avatar: contributor?.user?.photoURL,
+                                  name: contributor?.user?.displayName,
                                 })
                               }
                               disabled={

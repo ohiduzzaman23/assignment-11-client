@@ -15,10 +15,11 @@ const MyLessons = () => {
     if (!user?.email) return;
 
     axios
-      .get(`${import.meta.env.VITE_API_URL}/lessons`, {
-        params: { userEmail: user.email },
+      .get(`${import.meta.env.VITE_API_URL}/lessons`)
+      .then((res) => {
+        const myLessons = res.data.filter((l) => l.authorEmail === user.email);
+        setLessons(myLessons);
       })
-      .then((res) => setLessons(res.data))
       .catch((err) => console.error("Failed to fetch lessons:", err));
   }, [user]);
 

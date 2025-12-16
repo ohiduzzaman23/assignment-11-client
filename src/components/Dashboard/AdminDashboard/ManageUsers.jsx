@@ -32,23 +32,23 @@ const ManageUsers = () => {
         <div className="-mx-4 sm:-mx-3 px-4 sm:px-8 py-4 overflow-x-auto">
           <div className="inline-block min-w-full shadow rounded-lg overflow-hidden">
             <table className="min-w-full leading-normal">
-              <thead>
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
+                  <th className="px-4 py-3 border-b border-gray-200 text-gray-800 text-left text-sm font-medium tracking-wider break-words">
                     Name
                   </th>
-                  <th className="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
+                  <th className="px-4 py-3 border-b border-gray-200 text-gray-800 text-left text-sm font-medium tracking-wider break-words">
                     Email
                   </th>
-                  <th className="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
+                  <th className="px-4 py-3 border-b border-gray-200 text-gray-800 text-left text-sm font-medium tracking-wider break-words">
                     Role
                   </th>
-                  <th className="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
+                  <th className="px-4 py-3 border-b border-gray-200 text-gray-800 text-left text-sm font-medium tracking-wider break-words">
                     Action
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white">
                 {userList.map((u) => (
                   <UserDataRow
                     key={u._id.toString()}
