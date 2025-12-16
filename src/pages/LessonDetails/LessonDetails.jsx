@@ -191,6 +191,8 @@ const LessonDetails = () => {
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
   if (!lesson) return <p>Lesson not found</p>;
   if (lesson.premiumOnly) return <PremiumCard id={lesson._id} />;
+  console.log(lesson);
+
   return (
     <div className="min-h-screen bg-[#f6f1e7]">
       {/* Header */}
@@ -223,7 +225,14 @@ const LessonDetails = () => {
                 </span>
               ))}
             </div>
-
+            <div className="flex gap-5 mb-3">
+              <h3 className="px-3 py-1 text-[12px] bg-gray-100 rounded-full text-gray-600">
+                {lesson.category}
+              </h3>
+              <h3 className="px-3 py-1 text-[12px] bg-white border border-gray-200 rounded-full text-gray-600">
+                {lesson.tone}
+              </h3>
+            </div>
             {/* Title */}
             <h1 className="text-3xl font-semibold text-gray-900 mb-2">
               {lesson.title}

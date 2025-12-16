@@ -35,12 +35,21 @@ const ExploreLessons = () => {
 
     // Category
     if (categoryFilter !== "All Categories") {
-      temp = temp.filter((lesson) => lesson.tags?.includes(categoryFilter));
+      temp = temp.filter((lesson) => {
+        const tagsMatch = lesson.tags?.some(
+          (tag) => tag.toLowerCase() === categoryFilter.toLowerCase()
+        );
+        const categoryMatch =
+          lesson.category?.toLowerCase() === categoryFilter.toLowerCase();
+        return tagsMatch || categoryMatch;
+      });
     }
 
     // Tone
     if (toneFilter !== "All Tones") {
-      temp = temp.filter((lesson) => lesson.tone && lesson.tone === toneFilter);
+      temp = temp.filter(
+        (lesson) => lesson.tone?.toLowerCase() === toneFilter.toLowerCase()
+      );
     }
 
     // Sort
