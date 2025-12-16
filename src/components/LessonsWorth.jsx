@@ -19,9 +19,9 @@ const LessonsWorth = () => {
 
   if (isLoading) return <p className="text-center py-10">Loading...</p>;
 
-  const sortedLessons = [...lessons].sort(
-    (a, b) => (b.saves || 0) - (a.saves || 0)
-  );
+  const sortedLessons = [...lessons]
+    .filter((lesson) => (lesson.saves || 0) > 0)
+    .sort((a, b) => (b.saves || 0) - (a.saves || 0));
 
   sortedLessons.forEach((lesson, index) => {
     lesson.rank = (index + 1).toString().padStart(2, "0");
