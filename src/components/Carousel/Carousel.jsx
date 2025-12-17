@@ -1,12 +1,14 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+
 import Container from "../Shared/Container";
-import { Link } from "react-router-dom";
 
 const slides = [
   {
@@ -31,6 +33,15 @@ const slides = [
     link: "/pricing",
   },
 ];
+
+const textVariant = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.9, ease: "easeOut" },
+  },
+};
 
 export default function Carousel() {
   return (
@@ -58,16 +69,19 @@ export default function Carousel() {
               {/* Bottom Blur */}
               <div className="absolute bottom-0 left-0 w-full h-28 bg-gradient-to-t from-[#EDE9E1] to-transparent"></div>
 
-              {/* Text Content inside Container */}
-              <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 text-white">
+              {/* Animated Text */}
+              <motion.div
+                className="absolute top-1/2 left-0 w-full -translate-y-1/2 text-white"
+                variants={textVariant}
+                initial="hidden"
+                animate="visible"
+              >
                 <Container>
                   <div className="max-w-xl">
                     <h1 className="text-7xl font-bold mb-3 drop-shadow-lg">
                       {slide.title}
                     </h1>
-                    <p className="text-base opacity-90 mb-5 text-xl">
-                      {slide.subtitle}
-                    </p>
+                    <p className="opacity-90 mb-5 text-xl">{slide.subtitle}</p>
 
                     <Link to={slide.link}>
                       <button className="my-g-btn px-5 py-2 rounded-md font-semibold">
@@ -76,7 +90,7 @@ export default function Carousel() {
                     </Link>
                   </div>
                 </Container>
-              </div>
+              </motion.div>
             </div>
           </SwiperSlide>
         ))}

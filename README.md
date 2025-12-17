@@ -2,7 +2,11 @@
 
 Digital Life Lessons is a full-stack web platform where users can create, preserve, and share meaningful life lessons, personal growth insights, and wisdom gathered through real experiences. The platform encourages reflection, learning, and community engagement through structured content and premium features.
 
-\*\*Live Website:
+### Link
+
+- Live Website: https://life-lessons-acc17.web.app
+- Github Server Link: https://github.com/ohiduzzaman23/assignment-11-server
+- Github Client Link: https://github.com/ohiduzzaman23/assignment-10-clicent
 
 ---
 
