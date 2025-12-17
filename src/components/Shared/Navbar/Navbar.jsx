@@ -80,9 +80,9 @@ const Navbar = () => {
                   onClick={() => setIsOpen(!isOpen)}
                   className="p-4 bg-[#FAF2E4] md:py-1 md:px-1 border border-[#FAE8CE] flex items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition"
                 >
-                  <div className="hidden md:block">
+                  <div className="w-8 h-8 rounded-full overflow-hidden">
                     <img
-                      className="rounded-full"
+                      className="rounded-full object-cover"
                       referrerPolicy="no-referrer"
                       src={user?.photoURL || avatarImg}
                       alt="profile"

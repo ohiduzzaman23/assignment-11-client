@@ -16,7 +16,6 @@ import MyLessons from "../layouts/MyLessons";
 import EditLesson from "../components/Form/EditLesson";
 
 // Admin Dashboard Components
-
 import AdminDashboardLayout from "../components/Dashboard/AdminDashboard/AdminDashboardLayout";
 import AdminOverview from "../components/Dashboard/AdminDashboard/AdminOverview";
 import ManageUsers from "../components/Dashboard/AdminDashboard/ManageUsers";
@@ -27,6 +26,7 @@ import PaymentSuccess from "../components/Dashboard/Payment/PaymentSuccess";
 import PaymentCancelled from "../components/Dashboard/Payment/PaymentCancelled";
 import Favorites from "../layouts/Favorites";
 import ReportedLessons from "../components/Dashboard/AdminDashboard/ReportedLesson";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -34,18 +34,91 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: "/", element: <Home /> },
-      { path: "add-lesson", element: <AddLessonForm /> },
+
+      // Private Routes
+      {
+        path: "add-lesson",
+        element: (
+          <PrivateRoute>
+            <AddLessonForm />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "my-lessons",
+        element: (
+          <PrivateRoute>
+            <MyLessons />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "edit-lesson/:id",
+        element: (
+          <PrivateRoute>
+            <EditLesson />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "lessons/:id",
+        element: (
+          <PrivateRoute>
+            <LessonDetails />
+          </PrivateRoute>
+        ),
+      },
+
       { path: "explore-lessons", element: <ExploreLessons /> },
-      { path: "lessons/:id", element: <LessonDetails /> },
-      { path: "pricing", element: <Pricing /> },
+      {
+        path: "pricing",
+        element: (
+          <PrivateRoute>
+            <Pricing />
+          </PrivateRoute>
+        ),
+      },
       { path: "pricing/:lessonId", element: <Pricing /> },
-      { path: "my-lessons", element: <MyLessons /> },
-      { path: "edit-lesson/:id", element: <EditLesson /> },
-      { path: "profile", element: <Profile /> },
-      { path: "payment/:lessonId", element: <Payment /> },
-      { path: "payment-success", element: <PaymentSuccess /> },
-      { path: "payment-cancelled/:lessonId", element: <PaymentCancelled /> },
-      { path: "favorites-lessons", element: <Favorites /> },
+      {
+        path: "profile",
+        element: (
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "payment/:lessonId",
+        element: (
+          <PrivateRoute>
+            <Payment />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "payment-success",
+        element: (
+          <PrivateRoute>
+            <PaymentSuccess />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "payment-cancelled/:lessonId",
+        element: (
+          <PrivateRoute>
+            <PaymentCancelled />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "favorites-lessons",
+        element: (
+          <PrivateRoute>
+            <Favorites />
+          </PrivateRoute>
+        ),
+      },
 
       // User Dashboard
       {

@@ -8,25 +8,58 @@ import useAuth from "../hooks/useAuth";
 const MyLessons = () => {
   const [lessons, setLessons] = useState([]);
   const [menuOpen, setMenuOpen] = useState(null);
+  const [role, setRole] = useState(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
     if (!user?.email) return;
 
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/lessons`)
-      .then((res) => {
-        const myLessons = res.data.filter((l) => l.authorEmail === user.email);
-        setLessons(myLessons);
-      })
-      .catch((err) => console.error("Failed to fetch lessons:", err));
+    const fetchRole = async () => {
+      try {
+        const token = await user.getIdToken();
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/users/role`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setRole(res.data.role);
+      } catch (err) {
+        console.error("Failed to fetch role:", err);
+      }
+    };
+
+    fetchRole();
   }, [user]);
+
+  useEffect(() => {
+    if (!user?.email || !role) return;
+
+    const fetchLessons = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/lessons`);
+        const myLessons =
+          role === "admin"
+            ? res.data
+            : res.data.filter((l) => l.authorEmail === user.email);
+        setLessons(myLessons);
+      } catch (err) {
+        console.error("Failed to fetch lessons:", err);
+      }
+    };
+
+    fetchLessons();
+  }, [user, role]);
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this lesson?")) return;
+
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/lessons/${id}`);
+      const token = await user.getIdToken();
+      await axios.delete(`${import.meta.env.VITE_API_URL}/lessons/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setLessons((prev) => prev.filter((l) => l._id !== id));
     } catch (err) {
       console.error("Failed to delete lesson:", err);
@@ -76,7 +109,7 @@ const MyLessons = () => {
                     </div>
                   </div>
 
-                  {/* 3-dot*/}
+                  {/* 3-dot menu */}
                   <div className="relative">
                     <button
                       className="p-2 hover:bg-gray-100 rounded-full"
