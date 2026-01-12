@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  --color-primary: #f49d4b;
+  --color-secondary: #d72050;
+  --color-base-200: #f3f3f3;
+  --color-base-300: #e7e7e7;
+  --color-accent: #9f9f9f;
+}
+* {
+  font-family: "Poppins", sans-serif;
+}
+
+.my-btn {
+  @apply btn bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl hover:shadow-sm;
+}
+.my-g-btn {
+  @apply bg-gradient-to-r from-[#F5A11B] to-[#F97516] text-white rounded-xl shadow-md hover:from-[#F59E0B] hover:to-[#cc5804] hover:scale-105 transition-all duration-300;
+}

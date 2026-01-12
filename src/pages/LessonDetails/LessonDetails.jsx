@@ -1,0 +1,514 @@
+import React, { useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import LoadingSpinner from "../../components/Shared/LoadingSpinner";
+import { ArrowLeft, ThumbsUp, Bookmark, Share2, Flag } from "lucide-react";
+import PremiumCard from "./PremiumCard";
+import useAuth from "../../hooks/useAuth";
+
+const LessonDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const contributor = useAuth();
+
+  // ----- States ------
+  const [newComment, setNewComment] = useState("");
+  const [replyText, setReplyText] = useState({});
+  const [isSaved, setIsSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+
+  // ----- Fetch Lesson -----
+  const {
+    data: lesson,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["lesson", id],
+    queryFn: async () => {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}`
+      );
+      return res.data;
+    },
+    enabled: !!id,
+    onSuccess: (data) => {
+      setIsSaved(data.isSaved || false);
+      setIsLiked(data.isLiked || false);
+      setLikesCount(data.likes || 0);
+
+      // Increase view
+      axios
+        .post(`${import.meta.env.VITE_API_URL}/lessons/${id}/view`)
+        .catch(() => {});
+    },
+  });
+
+  // ----- Fetch Contributors -----
+  const { data: contributors = [] } = useQuery({
+    queryKey: ["contributors"],
+    queryFn: async () => {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/contributors`
+      );
+      return res.data;
+    },
+  });
+  // Fetch Similar Lessons
+  const { data: similarLessons = [] } = useQuery({
+    queryKey: ["similar-lessons", lesson?.tags],
+    queryFn: async () => {
+      if (!lesson?.tags?.length) return [];
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/lessons`, {
+        params: { tags: lesson.tags.join(",") },
+      });
+
+      return res.data.filter((l) => l._id !== lesson._id);
+    },
+    enabled: !!lesson?.tags?.length,
+  });
+
+  const lessonAuthor = contributors.find((c) => c.id === lesson?.authorId);
+
+  // -------- Lesson Mutations -------
+  const lessonLikeMutation = useMutation({
+    mutationFn: async () => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
+    onMutate: () => {
+      setIsLiked((prev) => !prev);
+      setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+    },
+    onError: () => {
+      setIsLiked((prev) => !prev);
+      setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+    },
+    onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
+  });
+
+  const lessonSaveMutation = useMutation({
+    mutationFn: async () => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/save`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["lesson", id]);
+      queryClient.invalidateQueries(["lessons-worth"]);
+      setIsSaved((prev) => !prev);
+    },
+  });
+
+  const lessonShareMutation = useMutation({
+    mutationFn: async () => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/share`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
+    onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
+  });
+
+  const lessonReportMutation = useMutation({
+    mutationFn: async (reason) => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/report`,
+        { reason },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
+    onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
+  });
+
+  // ----- Comment Mutations -------
+  const commentMutation = useMutation({
+    mutationFn: async (text) => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${import.meta.env.VITE_API_URL}/lessons/${id}/comments`,
+        {
+          text,
+          avatar: contributor?.user?.photoURL,
+          name: contributor?.user?.displayName,
+          userId: contributor?.user?.uid,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["lesson", id]);
+      setNewComment("");
+    },
+  });
+  const replyMutation = useMutation({
+    mutationFn: async ({ commentId, text }) => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${
+          import.meta.env.VITE_API_URL
+        }/lessons/${id}/comments/${commentId}/replies`,
+        { text },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["lesson", id]);
+      setReplyText({});
+    },
+  });
+
+  const likeCommentMutation = useMutation({
+    mutationFn: async (commentId) => {
+      const token = await contributor?.user?.getIdToken();
+      return axios.post(
+        `${
+          import.meta.env.VITE_API_URL
+        }/lessons/${id}/comments/${commentId}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    },
+    onSuccess: () => queryClient.invalidateQueries(["lesson", id]),
+  });
+
+  // Loading
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) return <p className="text-red-500">Error: {error.message}</p>;
+  if (!lesson) return <p>Lesson not found</p>;
+  if (lesson.premiumOnly) return <PremiumCard id={lesson._id} />;
+
+  return (
+    <div className="min-h-screen bg-[#f6f1e7]">
+      {/* Header */}
+      <div className="relative w-full h-[320px] overflow-hidden">
+        <img
+          src={lesson.image || "/mountain.jpg"}
+          className="w-full h-full object-cover"
+          alt="Header"
+        />
+        <div className="absolute bottom-0 left-0 w-full h-36 bg-gradient-to-t from-[#f6f1e7] to-transparent"></div>
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-6 left-6 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full flex items-center gap-2 text-gray-700 hover:bg-white transition"
+        >
+          <ArrowLeft size={18} /> Back
+        </button>
+      </div>
+
+      <div className="relative max-w-6xl mx-auto flex gap-6 px-4 pb-20 mt-[-80px] z-20">
+        <div className="flex-1">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            {/* Tags */}
+            <div className="flex gap-3 mb-3">
+              {lesson.tags?.map((tag, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 text-[13px] bg-gray-100 rounded-full text-gray-600"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-5 mb-3">
+              <h3 className="px-3 py-1 text-[12px] bg-gray-100 rounded-full text-gray-600">
+                {lesson.category}
+              </h3>
+              <h3 className="px-3 py-1 text-[12px] bg-white border border-gray-200 rounded-full text-gray-600">
+                {lesson.tone}
+              </h3>
+            </div>
+            {/* Title */}
+            <h1 className="text-3xl font-semibold text-gray-900 mb-2">
+              {lesson.title}
+            </h1>
+
+            <div className="flex items-center flex-wrap gap-4 text-gray-500 text-sm mb-6">
+              <span>{new Date(lesson.createdAt).toDateString()}</span>
+              <span>{lesson.views || 0} views</span>
+              <span>{likesCount} likes</span>
+              <span>{lesson.saves || 0} saves</span>
+              <span>{lesson.shares || 0} shares</span>
+            </div>
+
+            {/* Content */}
+            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+              {lesson.content}
+            </p>
+
+            {/* Lesson Actions */}
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={() => lessonLikeMutation.mutate()}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
+                  isLiked
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-100 hover:bg-[#F08B42] hover:text-white"
+                }`}
+              >
+                <ThumbsUp size={18} /> {likesCount} {isLiked ? "Liked" : "Like"}
+              </button>
+
+              <button
+                onClick={() => lessonSaveMutation.mutate()}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
+                  isSaved
+                    ? "bg-[#F08B42] text-white"
+                    : "bg-gray-100 hover:bg-[#F08B42] hover:text-white"
+                }`}
+              >
+                <Bookmark size={18} /> {lesson.saves || 0}{" "}
+                {isSaved ? "Saved" : "Save"}
+              </button>
+
+              <button
+                onClick={() => lessonShareMutation.mutate()}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-[#F08B42] hover:text-white transition"
+              >
+                <Share2 size={18} /> Share
+              </button>
+
+              <button
+                onClick={() => {
+                  const reason = prompt("Why are you reporting this lesson?");
+                  if (reason) lessonReportMutation.mutate(reason);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-[#F08B42] hover:text-white transition"
+              >
+                <Flag size={18} /> Report
+              </button>
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 mt-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Comments
+            </h2>
+
+            {/* New Comment */}
+            <div className="flex gap-3 mb-4">
+              <img
+                src={
+                  contributor?.user?.photoURL ||
+                  "https://i.pravatar.cc/40?u=" + contributor?.user?.uid
+                }
+                className="w-10 h-10 rounded-full"
+              />
+              <div className="flex-1">
+                <textarea
+                  className="w-full border border-gray-300 rounded-xl p-4 text-gray-700 focus:ring-2 focus:ring-orange-200 focus:outline-none"
+                  rows="3"
+                  placeholder="Share your thoughts..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                />
+                <button
+                  onClick={() => commentMutation.mutate(newComment)}
+                  disabled={!newComment || commentMutation.isLoading}
+                  className="mt-2 bg-orange-400 text-white px-5 py-2 rounded-lg hover:bg-orange-500 transition"
+                >
+                  {commentMutation.isLoading ? "Posting..." : "Post Comment"}
+                </button>
+              </div>
+            </div>
+
+            {/* Existing Comments */}
+            <div className="mt-6 space-y-6 max-h-[400px] overflow-auto">
+              {lesson.comments?.length ? (
+                lesson.comments.map((c) => (
+                  <div key={c._id} className="flex flex-col gap-2">
+                    <div className="flex gap-3">
+                      <img
+                        src={
+                          c.avatar ||
+                          "https://i.pravatar.cc/40?u=" + c.user ||
+                          "https://i.pravatar.cc/40?u=default"
+                        }
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-800">
+                          {c.name || c.user || "Anonymous"}
+                        </p>
+                        <p className="text-sm text-gray-500 mb-1">
+                          {new Date(c.createdAt).toLocaleDateString()}
+                        </p>
+                        <p className="text-gray-700">{c.text}</p>
+
+                        {/* Comment Actions */}
+                        <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                          <button
+                            onClick={() => likeCommentMutation.mutate(c._id)}
+                            className="flex items-center gap-1"
+                          >
+                            👍 {c.likes || 0}
+                          </button>
+                          <button
+                            onClick={() =>
+                              setReplyText((prev) => ({
+                                ...prev,
+                                [c._id]: prev[c._id] || "",
+                              }))
+                            }
+                          >
+                            Reply
+                          </button>
+                        </div>
+
+                        {/* Reply Box */}
+                        {replyText[c._id] !== undefined && (
+                          <div className="mt-2 flex flex-col gap-2">
+                            <textarea
+                              className="w-full border border-gray-300 rounded-xl p-2 text-gray-700 focus:ring-2 focus:ring-orange-200 focus:outline-none"
+                              rows="2"
+                              placeholder="Write a reply..."
+                              value={replyText[c._id]}
+                              onChange={(e) =>
+                                setReplyText((prev) => ({
+                                  ...prev,
+                                  [c._id]: e.target.value,
+                                }))
+                              }
+                            />
+                            <button
+                              onClick={() =>
+                                replyMutation.mutate({
+                                  commentId: c._id,
+                                  text: replyText[c._id],
+                                  avatar: contributor?.user?.photoURL,
+                                  name: contributor?.user?.displayName,
+                                })
+                              }
+                              disabled={
+                                !replyText[c._id] || replyMutation.isLoading
+                              }
+                              className="self-end bg-gray-200 px-4 py-1 rounded-lg hover:bg-gray-300"
+                            >
+                              {replyMutation.isLoading ? "Posting..." : "Reply"}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Replies */}
+                        {c.replies?.length > 0 && (
+                          <div className="mt-2 pl-6 flex flex-col gap-2">
+                            {c.replies.map((r) => (
+                              <div key={r._id} className="flex gap-3">
+                                <img
+                                  src={
+                                    r.avatar ||
+                                    "https://i.pravatar.cc/30?u=" + r.user
+                                  }
+                                  className="w-7 h-7 rounded-full"
+                                />
+                                <div>
+                                  <p className="font-semibold text-gray-700 text-sm">
+                                    {r.user || "Anonymous"}
+                                  </p>
+                                  <p className="text-gray-600 text-sm">
+                                    {r.text}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No comments yet. Be the first!</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="w-[280px] hidden lg:block">
+          {/* Written By */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-4">
+            <p className="font-medium text-gray-500 mb-2">Written by</p>
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src={
+                  contributor?.user?.photoURL ||
+                  lessonAuthor?.avatar ||
+                  lesson.authorAvatar ||
+                  "https://i.pravatar.cc/60?img=7"
+                }
+                className="w-14 h-14 rounded-full"
+              />
+              <div>
+                <p className="font-semibold text-gray-700">
+                  {contributor?.user?.displayName ||
+                    lessonAuthor?.name ||
+                    lesson.author ||
+                    "Unknown Author"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {lesson.authorLessonCount || 0} lessons shared
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/profile"
+              className="w-full bg-gray-100 p-2 rounded-lg text-gray-700 hover:bg-gray-200 transition"
+            >
+              View Profile
+            </Link>
+          </div>
+
+          {/* Similar Lessons */}
+          <div className="bg-white rounded-2xl shadow-lg p-5">
+            <h3 className="font-semibold text-gray-800">Similar Lessons</h3>
+            <div className="mt-3 flex flex-col gap-3 max-h-[300px] overflow-auto">
+              {similarLessons.length ? (
+                similarLessons.map((sl) => (
+                  <div
+                    key={sl._id}
+                    onClick={() => navigate(`/lessons/${sl._id}`)}
+                    className="cursor-pointer flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    <img
+                      src={sl.image || "/mountain.jpg"}
+                      className="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div className="flex-1">
+                      <p className="text-gray-700 font-medium text-sm">
+                        {sl.title}
+                      </p>
+                      <p className="text-gray-500 text-xs">
+                        {sl.tags?.join(", ")}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">
+                  No similar lessons found.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LessonDetails;
