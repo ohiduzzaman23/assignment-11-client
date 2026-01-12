@@ -1,5 +1,7 @@
 ## Assignment 8: Polish Your Assignment
 
+=======
+
 # Digital Life Lessons
 
 Digital Life Lessons is a full-stack web platform where users can create, preserve, and share meaningful life lessons, personal growth insights, and wisdom gathered through real experiences. The platform encourages reflection, learning, and community engagement through structured content and premium features.
